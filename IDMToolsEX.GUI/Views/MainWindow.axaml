@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IDMToolsEX.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="IDMToolsEX.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="IDMToolsEX"
+        MaxWidth="800" MaxHeight="450" MinWidth="400" MinHeight="300">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <SplitView PanePlacement="Right"
+               IsPaneOpen="{Binding IsPaneOpen}"
+               DisplayMode="Overlay"
+               OpenPaneLength="300"
+               CompactPaneLength="80"
+               PaneBackground="#2b2d30"
+               Background="#262626">
+        <SplitView.Pane>
+            <StackPanel>
+                <Button Command="{Binding TogglePaneCommand}">
+                    <PathIcon Data="{StaticResource arrow_left_regular}"></PathIcon>
+                </Button>
+                <Border BorderThickness="2"
+                        BoxShadow="-10 0 10 5 White">
+                    <StackPanel>
+                        <ScrollViewer>
+                            <TextBox Height="420" Background="#262626"></TextBox>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </SplitView.Pane>
+        <SplitView.Content>
+            <Grid ColumnDefinitions="1*, Auto" RowDefinitions="Auto, Auto" Margin="15 8">
+                <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="4*,0.5*,4*" RowDefinitions="Auto, 15, Auto"
+                      Margin="4">
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Host:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabaseHostTextBox" FilterMode="StartsWith" Watermark="10.52.76.66" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Port:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabasePortTextBox" FilterMode="StartsWith" Watermark="3306"
+                                         Text="3306" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Password:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabasePasswordTextBox" FilterMode="StartsWith"
+                                         Watermark="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted"
+                                         Text="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted" />
+                    </StackPanel>
+                </Grid>
+                <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Margin="0 30 0 0 ">
+                    <Button Width="400" Height="60" HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            FontSize="20" FontWeight="Bold">
+                        Connect
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </SplitView.Content>
+    </SplitView>
+
+</Window>
