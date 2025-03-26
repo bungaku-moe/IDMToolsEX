@@ -6,9 +6,11 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="IDMToolsEX.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="IDMToolsEX"
-        MaxWidth="800" MaxHeight="450" MinWidth="400" MinHeight="300">
+        Icon="/Assets/app-icon.ico"
+        Title="IDMToolsEX - Dashboard"
+        MaxWidth="800" MaxHeight="450" MinWidth="400" MinHeight="300"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="WhiteSmoke">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -16,57 +18,114 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <SplitView PanePlacement="Right"
-               IsPaneOpen="{Binding IsPaneOpen}"
-               DisplayMode="Overlay"
-               OpenPaneLength="300"
-               CompactPaneLength="80"
-               PaneBackground="#2b2d30"
-               Background="#262626">
-        <SplitView.Pane>
-            <StackPanel>
-                <Button Command="{Binding TogglePaneCommand}">
-                    <PathIcon Data="{StaticResource arrow_left_regular}"></PathIcon>
-                </Button>
-                <Border BorderThickness="2"
-                        BoxShadow="-10 0 10 5 White">
-                    <StackPanel>
-                        <ScrollViewer>
-                            <TextBox Height="420" Background="#262626"></TextBox>
-                        </ScrollViewer>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </SplitView.Pane>
-        <SplitView.Content>
-            <Grid ColumnDefinitions="1*, Auto" RowDefinitions="Auto, Auto" Margin="15 8">
-                <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="4*,0.5*,4*" RowDefinitions="Auto, 15, Auto"
+    <Window.Styles>
+        <Style Selector="HeaderedContentControl.group-container">
+            <Setter Property="Margin" Value="10" />
+        </Style>
+        <Style Selector="Grid.group-container">
+            <Setter Property="Margin" Value="10" />
+        </Style>
+        <Style Selector="Button.tool-item">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="1.5*, 1*" RowDefinitions="1*, 1*">
+        <HeaderedContentControl Header="Auth" Grid.Row="0" Grid.Column="0" Classes="group-container">
+            <Grid ColumnDefinitions="1*, 1*" RowDefinitions="1*, 1*">
+                <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="Auto, Auto, Auto"
+                      RowDefinitions="Auto, Auto, Auto"
                       Margin="4">
-                    <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Host:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabaseHostTextBox" FilterMode="StartsWith" Watermark="10.52.76.66" />
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="20 5" MinWidth="100">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Database:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabaseNameTextBox" FilterMode="StartsWith" Watermark="pos"
+                                         Text="{Binding Database}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="2">
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="20 5" MinWidth="120">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Host:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabaseHostTextBox" FilterMode="StartsWith" Watermark="10.52.76.66"
+                                         Text="{Binding Host}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" MinWidth="80">
                         <TextBlock Margin="0 5" FontWeight="Bold">Port:</TextBlock>
                         <AutoCompleteBox x:Name="DatabasePortTextBox" FilterMode="StartsWith" Watermark="3306"
-                                         Text="3306" />
+                                         Text="{Binding Port}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="0">
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="Auto, Auto, Auto"
+                      RowDefinitions="Auto, Auto, Auto"
+                      Margin="4">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="20 5" MinWidth="80">
+                        <TextBlock Margin="0 5" FontWeight="Bold">Username:</TextBlock>
+                        <AutoCompleteBox x:Name="DatabaseUsernameTextBox" FilterMode="StartsWith" Watermark="kasir"
+                                         Text="{Binding Username}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="20 5" MaxWidth="150">
                         <TextBlock Margin="0 5" FontWeight="Bold">Password:</TextBlock>
                         <AutoCompleteBox x:Name="DatabasePasswordTextBox" FilterMode="StartsWith"
                                          Watermark="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted"
-                                         Text="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted" />
+                                         Text="{Binding Password}" />
+                    </StackPanel>
+                    <!-- Aligning the Connect button properly -->
+                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <Button Width="100" Height="42" HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center" FontSize="16" FontWeight="Bold"
+                                Command="{Binding ToggleDatabaseConnectionCommand}"
+                                Content="{Binding DatabaseConnectText}" />
                     </StackPanel>
                 </Grid>
-                <StackPanel Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center" Margin="0 30 0 0 ">
-                    <Button Width="400" Height="60" HorizontalContentAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            FontSize="20" FontWeight="Bold">
-                        Connect
-                    </Button>
-                </StackPanel>
             </Grid>
-        </SplitView.Content>
-    </SplitView>
+        </HeaderedContentControl>
 
+        <HeaderedContentControl Header="IDM Tools" Grid.Row="0" Grid.Column="1" Classes="group-container">
+            <WrapPanel>
+                <Button Content="Actual Cash" Classes="tool-item" Command="{Binding OpenActualCashWindowCommand}" />
+            </WrapPanel>
+        </HeaderedContentControl>
+
+        <HeaderedContentControl Header="Windows Tools" Grid.Row="1" Grid.Column="1" Classes="group-container">
+            <ScrollViewer>
+                <WrapPanel Orientation="Horizontal">
+                    <Button Classes="tool-item" Content="Calculator" Command="{Binding OpenAppCommand}"
+                            CommandParameter="calc" />
+                    <Button Classes="tool-item" Content="Notepad" Command="{Binding OpenAppCommand}"
+                            CommandParameter="notepad" />
+                    <Button Classes="tool-item" Content="Web Browser" Command="{Binding OpenAppCommand}"
+                            CommandParameter="firefox" />
+                    <Button Classes="tool-item" Content="Group Policy Editor" Command="{Binding OpenAppCommand}"
+                            CommandParameter="gpedit.msc" />
+                    <Button Classes="tool-item" Content="Command Prompt" Command="{Binding OpenAppCommand}"
+                            CommandParameter="cmd" />
+                    <Button Classes="tool-item" Content="File Explorer" Command="{Binding OpenAppCommand}"
+                            CommandParameter="explorer" />
+                    <Button Classes="tool-item" Content="Task Manager" Command="{Binding OpenAppCommand}"
+                            CommandParameter="taskmgr" />
+                </WrapPanel>
+            </ScrollViewer>
+        </HeaderedContentControl>
+
+        <Grid Grid.Row="1" Grid.Column="0" Classes="group-container">
+            <!-- Log ScrollViewer -->
+            <ScrollViewer>
+                <TextBox
+                    Text="{Binding LogText}"
+                    IsReadOnly="True"
+                    AcceptsReturn="True" />
+            </ScrollViewer>
+
+            <!-- Clear Log Button (Overlay) -->
+            <Button Content="Clear Log"
+                    Command="{Binding ClearLogCommand}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="5"
+                    Padding="10"
+                    Background="White"
+                    Opacity="0.8"
+                    ZIndex="1" />
+        </Grid>
+    </Grid>
 </Window>

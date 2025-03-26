@@ -1,0 +1,44 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IDMToolsEX.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
+        x:Class="IDMToolsEX.Views.ActualCashWindow"
+        x:DataType="vm:ActualCashWindowViewModel"
+        Icon="/Assets/app-icon.ico"
+        Title="IDMToolsEX - Actual Cash"
+        MaxWidth="320" MaxHeight="250" MinWidth="350" MinHeight="250"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="WhiteSmoke">
+
+    <!-- <Window.DataContext> -->
+    <!--     <vm:ActualCashWindowViewModel /> -->
+    <!-- </Window.DataContext> -->
+
+    <StackPanel Margin="20" Spacing="10">
+        <StackPanel HorizontalAlignment="Stretch">
+            <TextBlock Text="Date:" />
+            <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
+        </StackPanel>
+
+        <StackPanel>
+            <TextBlock Text="Shift:" />
+            <NumericUpDown Minimum="1" Maximum="2" FormatString="0" Value="{Binding Shift}" />
+        </StackPanel>
+
+        <StackPanel>
+            <TextBlock Text="Station:" />
+            <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="20">
+            <Button Content="Get Actual Cash"
+                    Command="{Binding GetActualCashCommand}" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Actual Cash: " VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ActualCash, StringFormat='C'}" VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>
