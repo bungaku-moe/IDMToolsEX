@@ -34,7 +34,8 @@ public class DatabaseService : IDisposable
         return _connection.State == ConnectionState.Open;
     }
 
-    private async Task<T?> GetSingleValueAsync<T>(string column, DateTimeOffset date, int shift, int station, string table = "initial")
+    private async Task<T?> GetSingleValueAsync<T>(string column, DateTimeOffset date, int shift, int station,
+        string table = "initial")
         where T : struct
     {
         if (!IsConnected)

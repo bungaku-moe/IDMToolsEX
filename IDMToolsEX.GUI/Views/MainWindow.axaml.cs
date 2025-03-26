@@ -1,5 +1,7 @@
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace IDMToolsEX.Views;
 
@@ -13,6 +15,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Initialization();
+        Closed += (_, _) =>
+        {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.MainWindow = null;
+        };
     }
 
     private void Initialization()

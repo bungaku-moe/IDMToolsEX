@@ -34,11 +34,12 @@ public partial class ActualCashWindowViewModel : ViewModelBase
 
         ActualCash =
             await _databaseService.GetKasAktualAsync(Date, Shift, Station);
-        decimal? kasComp = await _databaseService.GetKasComAsync(Date, Shift, Station);
-        decimal? salesCash = await _databaseService.GetKSalesCashAsync(Date, Shift, Station);
-        decimal? stationKasAktual = await _databaseService.GetStationKasAktualAsync(Date, Shift, Station);
-        decimal? mtranToday = await _databaseService.GetMtranTodayAsync(Date, Shift, Station);
+        var kasComp = await _databaseService.GetKasComAsync(Date, Shift, Station);
+        var salesCash = await _databaseService.GetKSalesCashAsync(Date, Shift, Station);
+        var stationKasAktual = await _databaseService.GetStationKasAktualAsync(Date, Shift, Station);
+        var mtranToday = await _databaseService.GetMtranTodayAsync(Date, Shift, Station);
 
-        _mainWindowViewModel.AppendLog($"KAS_AKTUAL: {ActualCash} | KAS_COMP: {kasComp} | SALES_CASH: {salesCash} | STATION_KAS_AKTUAL: {stationKasAktual} | Mtran: {mtranToday}");
+        _mainWindowViewModel.AppendLog(
+            $"KAS_AKTUAL: {ActualCash} | KAS_COMP: {kasComp} | SALES_CASH: {salesCash} | STATION_KAS_AKTUAL: {stationKasAktual} | Mtran: {mtranToday}");
     }
 }

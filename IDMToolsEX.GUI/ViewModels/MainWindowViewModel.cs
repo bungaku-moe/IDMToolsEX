@@ -6,80 +6,81 @@ using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.Views;
 
-namespace IDMToolsEX.ViewModels
+namespace IDMToolsEX.ViewModels;
+
+public partial class MainWindowViewModel : ViewModelBase
 {
-    public partial class MainWindowViewModel : ViewModelBase
+    [ObservableProperty] private string _database = "pos";
+    [ObservableProperty] private string _databaseConnectText = "Connect";
+    private DatabaseService? _databaseService;
+    [ObservableProperty] private string _host = "10.52.111.2";
+    [ObservableProperty] private bool _isConnected;
+    [ObservableProperty] private string _password = "Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted";
+    [ObservableProperty] private string _port = "3306";
+    [ObservableProperty] private string _username = "kasir";
+
+    public MainWindowViewModel()
     {
-        private DatabaseService? _databaseService;
+        _databaseService = new DatabaseService(GetConnectionString());
+    }
 
-        [ObservableProperty] private string _database = "pos";
-        [ObservableProperty] private string _databaseConnectText = "Connect";
-        [ObservableProperty] private string _host = "10.52.111.2";
-        [ObservableProperty] private bool _isConnected;
-        [ObservableProperty] private string _password = "Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted";
-        [ObservableProperty] private string _port = "3306";
-        [ObservableProperty] private string _username = "kasir";
+    [RelayCommand]
+    private void OpenApp(string? appName)
+    {
+        if (string.IsNullOrWhiteSpace(appName))
+            return;
 
-        public MainWindowViewModel()
+        try
         {
-            _databaseService = new DatabaseService(GetConnectionString());
+            AppendLog($"Starting application: {appName}...");
+            Process.Start(new ProcessStartInfo(appName) { UseShellExecute = true });
         }
-
-        [RelayCommand]
-        private void OpenApp(string? appName)
+        catch (Exception ex)
         {
-            if (string.IsNullOrWhiteSpace(appName))
-                return;
-
-            try
-            {
-                AppendLog($"Starting application: {appName}...");
-                Process.Start(new ProcessStartInfo(appName) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                AppendLog($"Error: Failed to start {appName}. {ex.Message}");
-            }
+            AppendLog($"Error: Failed to start {appName}. {ex.Message}");
         }
+    }
 
-        [RelayCommand]
-        private async Task ToggleDatabaseConnectionAsync()
+    [RelayCommand]
+    private async Task ToggleDatabaseConnectionAsync()
+    {
+        try
         {
-            try
-            {
-                AppendLog(IsConnected ? "Disconnecting from the database..." : "Connecting to the database...");
+            AppendLog(IsConnected ? "Disconnecting from the database..." : "Connecting to the database...");
 
-                if (_databaseService == null)
-                    _databaseService = new DatabaseService(GetConnectionString());
-
-                IsConnected = await _databaseService.ToggleConnectionAsync();
-
-                AppendLog(IsConnected ? "Connected to the database." : "Disconnected from the database.");
-            }
-            catch (Exception e)
-            {
-                AppendLog($"Database connection error: {e.Message}");
-            }
-            finally
-            {
-                DatabaseConnectText = IsConnected ? "Disconnect" : "Connect";
-            }
-        }
-
-        private string GetConnectionString() =>
-            $"allow user variables=true;Persist Security Info=True;server={Host};port={Port};pooling=true;user id={Username};password={Password};connection timeout=75;database={Database};";
-
-        [RelayCommand]
-        private void OpenActualCashWindow()
-        {
             if (_databaseService == null)
-            {
-                AppendLog("Error: Database service is not initialized.");
-                return;
-            }
+                _databaseService = new DatabaseService(GetConnectionString());
 
-            var window = new ActualCashWindow(this, _databaseService);
-            window.Show();
+            IsConnected = await _databaseService.ToggleConnectionAsync();
+
+            AppendLog(IsConnected ? "Connected to the database." : "Disconnected from the database.");
         }
+        catch (Exception e)
+        {
+            AppendLog($"Database connection error: {e.Message}");
+        }
+        finally
+        {
+            DatabaseConnectText = IsConnected ? "Disconnect" : "Connect";
+        }
+    }
+
+    private string GetConnectionString()
+    {
+        return
+            $"allow user variables=true;Persist Security Info=True;server={Host};port={Port};pooling=true;user id={Username};password={Password};connection timeout=75;database={Database};";
+    }
+
+    [RelayCommand]
+    private void OpenActualCashWindow()
+    {
+        if (_databaseService == null)
+        {
+            AppendLog("Error: Database service is not initialized.");
+            return;
+        }
+
+        var window = new ActualCashWindow(this, _databaseService);
+        window.Show();
     }
 }
