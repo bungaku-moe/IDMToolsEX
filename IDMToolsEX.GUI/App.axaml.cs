@@ -1,17 +1,25 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using GlobalHotKeys.Native.Types;
 using IDMToolsEX.ViewModels;
-using IDMToolsEX.Views;
+using HotKeyManager = GlobalHotKeys.HotKeyManager;
 
 namespace IDMToolsEX;
 
 public class App : Application
 {
+    private readonly AppViewModel _appViewModel;
+    private HotKeyManager? _hotKeyManager;
+    private IDisposable? _hotKeySubscription;
+
     public App()
     {
-        DataContext = new AppViewModel();
+        _appViewModel = new AppViewModel();
+        DataContext = _appViewModel;
     }
 
     public override void Initialize()
@@ -23,11 +31,19 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            desktop.MainWindow = new MainWindow
+            _hotKeyManager = new HotKeyManager();
+            _hotKeySubscription = _hotKeyManager.Register(VirtualKeyCode.VK_HOME, Modifiers.Control);
+
+            _hotKeyManager.HotKeyPressed
+                .Subscribe(hotKey => { Dispatcher.UIThread.Post(() => { _appViewModel.ShowWindow(); }); });
+
+            desktop.Exit += (sender, args) =>
             {
-                DataContext = new MainWindowViewModel()
+                _hotKeySubscription.Dispose();
+                _hotKeyManager.Dispose();
             };
+
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
         }
 
         base.OnFrameworkInitializationCompleted();

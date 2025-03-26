@@ -25,6 +25,7 @@
         </PackageReference>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1"/>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="GlobalHotKeys.Windows" Version="0.1.0"/>
     </ItemGroup>
 
     <ItemGroup>

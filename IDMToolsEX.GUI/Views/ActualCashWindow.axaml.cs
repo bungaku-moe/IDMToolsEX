@@ -4,7 +4,7 @@ using IDMToolsEX.ViewModels;
 
 namespace IDMToolsEX.Views;
 
-public class ActualCashWindow : Window
+public partial class ActualCashWindow : Window
 {
     public ActualCashWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
