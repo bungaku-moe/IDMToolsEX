@@ -4,12 +4,14 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
+using IDMToolsEX.Utility;
 using IDMToolsEX.Views;
 
 namespace IDMToolsEX.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private readonly SystemSecurity _systemSecurity;
     [ObservableProperty] private string _database = "pos";
     [ObservableProperty] private string _databaseConnectText = "Connect";
     private DatabaseService? _databaseService;
@@ -17,10 +19,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isConnected;
     [ObservableProperty] private string _password = "Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted";
     [ObservableProperty] private string _port = "3306";
+    [ObservableProperty] private string _toggleRestrictionsText = "Disable Restrictions";
     [ObservableProperty] private string _username = "kasir";
 
     public MainWindowViewModel()
     {
+        _systemSecurity = new SystemSecurity();
         _databaseService = new DatabaseService(GetConnectionString());
     }
 
@@ -82,5 +86,21 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var window = new ActualCashWindow(this, _databaseService);
         window.Show();
+    }
+
+    [RelayCommand]
+    private void ToggleRestrictions()
+    {
+        switch (_systemSecurity.ArePoliciesEnabled())
+        {
+            case true:
+                ToggleRestrictionsText = "Disable Restrictions";
+                _systemSecurity.DisablePolicies();
+                break;
+            case false:
+                ToggleRestrictionsText = "Enable Restrictions";
+                _systemSecurity.EnablePolicies();
+                break;
+        }
     }
 }
