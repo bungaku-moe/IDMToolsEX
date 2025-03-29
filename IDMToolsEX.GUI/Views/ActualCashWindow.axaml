@@ -37,7 +37,7 @@
                     Command="{Binding GetActualCashCommand}" />
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Actual Cash: " VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ActualCash, StringFormat='C'}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ActualCash, StringFormat='{}{0:N0} IDR'}" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

@@ -71,7 +71,7 @@
                     <!-- Aligning the Connect button properly -->
                     <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                        <Button Width="100" Height="42" HorizontalContentAlignment="Center"
+                        <Button Width="120" Height="42" HorizontalContentAlignment="Center"
                                 VerticalContentAlignment="Center" FontSize="16" FontWeight="Bold"
                                 Command="{Binding ToggleDatabaseConnectionCommand}"
                                 Content="{Binding DatabaseConnectText}" />
@@ -85,6 +85,7 @@
                 <Button Content="Actual Cash" Classes="tool-item" Command="{Binding OpenActualCashWindowCommand}" />
                 <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
                         Command="{Binding ToggleRestrictionsCommand}" />
+                <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" />
             </WrapPanel>
         </HeaderedContentControl>
 

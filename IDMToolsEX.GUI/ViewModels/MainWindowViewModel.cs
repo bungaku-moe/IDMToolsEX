@@ -25,7 +25,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _systemSecurity = new SystemSecurity();
-        _databaseService = new DatabaseService(GetConnectionString());
+        // _databaseService = new DatabaseService(Database, Host, Port, Username, Password);
     }
 
     [RelayCommand]
@@ -46,15 +46,13 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ToggleDatabaseConnectionAsync()
+    private async Task ToggleDatabaseConnection()
     {
         try
         {
             AppendLog(IsConnected ? "Disconnecting from the database..." : "Connecting to the database...");
 
-            if (_databaseService == null)
-                _databaseService = new DatabaseService(GetConnectionString());
-
+            _databaseService = new DatabaseService(Database, Host, Port, Username, Password);
             IsConnected = await _databaseService.ToggleConnectionAsync();
 
             AppendLog(IsConnected ? "Connected to the database." : "Disconnected from the database.");
@@ -69,10 +67,17 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private string GetConnectionString()
+    [RelayCommand]
+    private async void TestDb()
     {
-        return
-            $"allow user variables=true;Persist Security Info=True;server={Host};port={Port};pooling=true;user id={Username};password={Password};connection timeout=75;database={Database};";
+        try
+        {
+            AppendLog(await _databaseService.TestAsync());
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     [RelayCommand]
@@ -80,7 +85,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (_databaseService == null)
         {
-            AppendLog("Error: Database service is not initialized.");
+            AppendLog("Error: Database service is not initialized. Please connect to the database first.");
             return;
         }
 
