@@ -6,9 +6,10 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.ActualCashWindow"
         x:DataType="vm:ActualCashWindowViewModel"
+        MaxWidth="465" MaxHeight="635" MinWidth="465" MinHeight="635"
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Actual Cash"
-        MaxWidth="320" MaxHeight="250" MinWidth="350" MinHeight="250"
+
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 
@@ -17,28 +18,58 @@
     <!-- </Window.DataContext> -->
 
     <StackPanel Margin="20" Spacing="10">
-        <StackPanel HorizontalAlignment="Stretch">
-            <TextBlock Text="Date:" />
-            <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
-        </StackPanel>
+        <HeaderedContentControl Header="Initial Info">
+            <StackPanel>
+                <StackPanel HorizontalAlignment="Stretch">
+                    <TextBlock Text="Date:" />
+                    <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
+                </StackPanel>
 
-        <StackPanel>
-            <TextBlock Text="Shift:" />
-            <NumericUpDown Minimum="1" Maximum="2" FormatString="0" Value="{Binding Shift}" />
-        </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Shift:" />
+                    <NumericUpDown Minimum="1" Maximum="3" FormatString="0" Value="{Binding Shift}" />
+                </StackPanel>
 
-        <StackPanel>
-            <TextBlock Text="Station:" />
-            <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station}" />
-        </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Station:" />
+                    <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station}" />
+                </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Spacing="20">
-            <Button Content="Get Actual Cash"
-                    Command="{Binding GetActualCashCommand}" />
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Actual Cash: " VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ActualCash, StringFormat='{}{0:N0} IDR'}" VerticalAlignment="Center" />
+                <Button Content="Get Sales Info"
+                        Command="{Binding GetSalesInfoCommand}" />
             </StackPanel>
-        </StackPanel>
+        </HeaderedContentControl>
+        <HeaderedContentControl Header="Calculate">
+            <StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Sales Deposit:" />
+                    <NumericUpDown
+                        ShowButtonSpinner="False"
+                        Value="{Binding SalesDeposit}"
+                        FormatString="C0" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="Actual Cash:" />
+                    <NumericUpDown
+                        ShowButtonSpinner="False"
+                        Value="{Binding ActualCash}"
+                        FormatString="C0" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <Button Content="Calculate Actual Cash"
+                            Command="{Binding CalculateActualCashCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </HeaderedContentControl>
+        <DataGrid ItemsSource="{Binding CashSummaryRows}" AutoGenerateColumns="False" GridLinesVisibility="All"
+                  CanUserResizeColumns="True" CanUserSortColumns="True" HeadersVisibility="Column" Margin="10"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
     </StackPanel>
 </Window>

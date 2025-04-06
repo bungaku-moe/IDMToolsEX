@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,36 +12,101 @@ public partial class ActualCashWindowViewModel : ViewModelBase
 {
     private readonly DatabaseService _databaseService;
     private readonly MainWindowViewModel _mainWindowViewModel;
-    [ObservableProperty] private decimal? _actualCash = 0;
+    private readonly CultureInfo _idrCulture = new("id-ID");
+
     [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
+    [ObservableProperty] private string? _salesDeposit = "0";
+    [ObservableProperty] private string? _actualCash = "0";
     [ObservableProperty] private int _shift = 1;
     [ObservableProperty] private int _station = 1;
+    [ObservableProperty] private decimal? _totalCash = 0;
+    [ObservableProperty] private decimal? _totalChangeCash = 0;
+    [ObservableProperty] private decimal? _expectedActualCash = 0;
+    [ObservableProperty] private decimal? _variance = 0;
+
+    public ObservableCollection<CashSummaryRow> CashSummaryRows { get; set; } = [];
 
     public ActualCashWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         _databaseService = databaseService;
         _mainWindowViewModel = mainWindowViewModel;
+
+        CashSummaryRows.Add(new CashSummaryRow { Name = "Total Cash", Value = FormatCurrency(TotalCash) });
+        CashSummaryRows.Add(new CashSummaryRow { Name = "Total Change Cash", Value = FormatCurrency(TotalChangeCash) });
+        CashSummaryRows.Add(new CashSummaryRow { Name = "Expected Actual Cash", Value = FormatCurrency(ExpectedActualCash) });
+        CashSummaryRows.Add(new CashSummaryRow { Name = "Variance", Value = FormatCurrency(Variance) });
     }
 
     [RelayCommand]
-    private async Task GetActualCash()
+    private async Task GetSalesInfo()
     {
-        _mainWindowViewModel.AppendLog("Getting Actual Cash...");
-
+        _mainWindowViewModel.AppendLog("Getting sales info...");
         if (!_databaseService.IsConnected)
         {
-            _mainWindowViewModel.AppendLog("Failed to get Actual Cash. Database not connected!");
+            _mainWindowViewModel.AppendLog("Failed to get sales info. Database not connected!");
             return;
         }
 
-        ActualCash =
-            await _databaseService.GetKasAktual(Date, Shift, Station);
-        var kasComp = await _databaseService.GetKasCom(Date, Shift, Station);
-        var salesCash = await _databaseService.GetKSalesCash(Date, Shift, Station);
-        var stationKasAktual = await _databaseService.GetStationKasAktual(Date, Shift, Station);
-        var mtranToday = await _databaseService.GetMtranToday(Date, Shift, Station);
+        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift, Station);
+        TotalCash = result.totalCash;
+        TotalChangeCash = result.totalChangeCash;
+        ExpectedActualCash = result.totalSalesCash;
+    }
 
-        _mainWindowViewModel.AppendLog(
-            $"KAS_AKTUAL: {ActualCash} | KAS_COMP: {kasComp} | SALES_CASH: {salesCash} | STATION_KAS_AKTUAL: {stationKasAktual} | Mtran: {mtranToday}");
+    [RelayCommand]
+    private void CalculateActualCash()
+    {
+        var salesDepositDecimal = ParseDecimal(SalesDeposit);
+        var actualCashDecimal = ParseDecimal(ActualCash);
+
+        ExpectedActualCash = TotalCash - (TotalChangeCash + salesDepositDecimal);
+        Variance = ExpectedActualCash - actualCashDecimal;
+    }
+
+    partial void OnTotalCashChanged(decimal? value)
+    {
+        CashSummaryRows[0].Value = FormatCurrency(value);
+        CashSummaryRows[0].NotifyValueChanged();
+    }
+
+    partial void OnTotalChangeCashChanged(decimal? value)
+    {
+        CashSummaryRows[1].Value = FormatCurrency(value);
+        CashSummaryRows[1].NotifyValueChanged();
+    }
+
+    partial void OnExpectedActualCashChanged(decimal? value)
+    {
+        CashSummaryRows[2].Value = FormatCurrency(value);
+        CashSummaryRows[2].NotifyValueChanged();
+    }
+
+    partial void OnVarianceChanged(decimal? value)
+    {
+        CashSummaryRows[3].Value = FormatCurrency(value);
+        CashSummaryRows[3].NotifyValueChanged();
+    }
+
+    private decimal ParseDecimal(string? input)
+    {
+        if (decimal.TryParse(input, NumberStyles.Any, _idrCulture, out var result))
+            return result;
+        return 0;
+    }
+
+    private string FormatCurrency(decimal? value)
+    {
+        return (value ?? 0).ToString("C0", _idrCulture); // IDR format, no decimal places
+    }
+}
+
+public partial class CashSummaryRow : ObservableObject
+{
+    [ObservableProperty] private string _name = string.Empty;
+    [ObservableProperty] private string? _value;
+
+    public void NotifyValueChanged()
+    {
+        OnPropertyChanged(nameof(Value));
     }
 }

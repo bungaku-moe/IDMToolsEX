@@ -12,6 +12,7 @@ namespace IDMToolsEX.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly SystemSecurity _systemSecurity;
+
     [ObservableProperty] private string _database = "pos";
     [ObservableProperty] private string _databaseConnectText = "Connect";
     private DatabaseService? _databaseService;
@@ -25,7 +26,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _systemSecurity = new SystemSecurity();
-        // _databaseService = new DatabaseService(Database, Host, Port, Username, Password);
     }
 
     [RelayCommand]
@@ -52,10 +52,17 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             AppendLog(IsConnected ? "Disconnecting from the database..." : "Connecting to the database...");
 
-            _databaseService = new DatabaseService(Database, Host, Port, Username, Password);
+            _databaseService ??= new DatabaseService(Database, Host, Port, Username, Password);
             IsConnected = await _databaseService.ToggleConnectionAsync();
 
             AppendLog(IsConnected ? "Connected to the database." : "Disconnected from the database.");
+
+            // Optional: dispose after disconnect
+            if (!IsConnected)
+            {
+                _databaseService.Dispose();
+                _databaseService = null;
+            }
         }
         catch (Exception e)
         {
@@ -72,7 +79,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            AppendLog(await _databaseService.TestAsync());
+            // AppendLog(await _databaseService.TestAsync());
         }
         catch (Exception e)
         {

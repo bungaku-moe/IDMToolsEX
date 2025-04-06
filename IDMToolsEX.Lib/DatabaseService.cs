@@ -8,7 +8,6 @@ public class DatabaseService : IDisposable
 {
     private readonly string _connectionString;
     private MySqlConnection? _connection;
-    private bool _isConnected;
 
     public DatabaseService(string database, string host, string port, string username, string password)
     {
@@ -16,7 +15,7 @@ public class DatabaseService : IDisposable
             $"Database={database};Server={host};Port={port};User Id={username};Password={password};Allow User Variables=true;Persist Security Info=True;Pooling=true;Connection Timeout=30;";
     }
 
-    public bool IsConnected => _isConnected;
+    public bool IsConnected { get; private set; }
 
     public void Dispose()
     {
@@ -25,163 +24,123 @@ public class DatabaseService : IDisposable
 
     private async Task EnsureConnectedAsync()
     {
-        if (!_isConnected) return; // Prevent reconnection if toggled off
+        if (!IsConnected) return;
 
-        if (_connection == null)
-        {
-            _connection = new MySqlConnection(_connectionString);
-        }
+        if (_connection == null) _connection = new MySqlConnection(_connectionString);
 
-        if (_connection.State != ConnectionState.Open)
-        {
-            await _connection.OpenAsync();
-        }
+        if (_connection.State != ConnectionState.Open) await _connection.OpenAsync();
     }
 
 
     public async Task<bool> ToggleConnectionAsync()
     {
-        if (_isConnected)
+        if (IsConnected)
         {
             if (_connection != null)
             {
                 await _connection.CloseAsync();
-                await _connection.DisposeAsync(); // Ensure proper cleanup
-                _connection = null; // Prevent reuse of the old connection
+                await _connection.DisposeAsync();
+                _connection = null;
             }
 
-            _isConnected = false;
+            IsConnected = false;
         }
         else
         {
-            await EnsureConnectedAsync();
-            _isConnected = true;
-        }
-
-        return _isConnected;
-    }
-
-
-    private async Task<T?> GetSingleValueAsync<T>(string column, DateTimeOffset date, int shift, int station,
-        string table = "initial")
-        where T : struct
-    {
-        try
-        {
-            await EnsureConnectedAsync(); // Ensure the connection is open
-
-            var query = $"""
-                         SELECT {column} FROM {table}
-                         WHERE TANGGAL = @Tanggal AND SHIFT = @Shift AND STATION = @Station
-                         """;
-
-            return await _connection.QueryFirstOrDefaultAsync<T?>(query, new
-            {
-                Tanggal = date.ToString("yyyy-MM-dd"),
-                Shift = shift,
-                Station = station.ToString("D2")
-            });
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"[Database Error] {e.Message}");
-            throw;
-        }
-    }
-
-    public Task<decimal?> GetKasAktualAsync(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValueAsync<decimal>("KAS_AKTUAL", date, shift, station);
-    }
-
-    public Task<decimal?> GetKasComAsync(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValueAsync<decimal>("KAS_COMP", date, shift, station);
-    }
-
-    public Task<decimal?> GetKSalesCashAsync(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValueAsync<decimal>("SALES_CASH", date, shift, station);
-    }
-
-    public Task<decimal?> GetStationKasAktualAsync(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValueAsync<decimal>("Station_kas_aktual", date, shift, station);
-    }
-
-    public Task<decimal?> GetMtranTodayAsync(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValueAsync<decimal>("SUM(GROSS) AS Total", date, shift, station, "mtran");
-    }
-
-    public async Task<string> TestAsync()
-    {
-        try
-        {
+            IsConnected = true; // Set before calling EnsureConnectedAsync
             await EnsureConnectedAsync();
 
-            var query = "SELECT PLU, BARCODE, ADDTIME FROM barcode LIMIT 10"; // Ensure you select a valid column
-            var result = await _connection.QueryAsync<string>(query);
-
-            return result is not null ? string.Join(", ", result) : "No data found.";
+            // If EnsureConnectedAsync fails, we assume connection was unsuccessful
+            if (_connection?.State != ConnectionState.Open) IsConnected = false;
         }
-        catch (Exception e)
-        {
-            Console.WriteLine($"[Database Test Error] {e.Message}");
-            return string.Empty;
-        }
+
+        return IsConnected;
     }
 
-    #region MYSQL
 
-    public async Task<decimal?> GetSingleValue(string column, DateTimeOffset date, int shift, int station,
-        string table = "initial")
+    public async Task<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)> GetExpectedActualCashAsync(
+        DateTimeOffset date, int shift, int station)
     {
-        try
-        {
-            await EnsureConnectedAsync();
-            var query =
-                $"SELECT {column} FROM {table} WHERE TANGGAL = @Tanggal AND SHIFT = @Shift AND STATION = @Station";
+        await EnsureConnectedAsync();
 
-            using var cmd = new MySqlCommand(query, _connection);
-            cmd.Parameters.AddWithValue("@Tanggal", date.ToString("yyyy-MM-dd"));
-            cmd.Parameters.AddWithValue("@Shift", shift);
-            cmd.Parameters.AddWithValue("@Station", station.ToString("D2"));
+        const string query = @"
+        SELECT
+            IFNULL(SUM(NILAI), 0) AS totalCash,
+            IFNULL(SUM(KEMBALI), 0) AS changeCash,
+            IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalSalesCash
+        FROM bayar
+        WHERE
+            TANGGAL = @Tanggal AND
+            SHIFT = @Shift AND
+            TIPE = 'CSH' AND
+            STATION = @Station;
+    ";
 
-            var result = await cmd.ExecuteScalarAsync();
-            return result != DBNull.Value ? Convert.ToDecimal(result) : null;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"[Database Error] {e.Message}");
-            return null;
-        }
+        var result =
+            await _connection
+                .QuerySingleOrDefaultAsync<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)?>(
+                    query,
+                    new
+                    {
+                        Tanggal = date.ToString("yyyy-MM-dd"),
+                        Shift = shift,
+                        Station = station.ToString("D2")
+                    });
+
+        // Null check: If result is null, return 0s
+        if (result is null)
+            return (0, 0, 0);
+
+        return result.Value;
     }
 
-    public Task<decimal?> GetKasAktual(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValue("KAS_AKTUAL", date, shift, station);
-    }
-
-    public Task<decimal?> GetKasCom(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValue("KAS_COMP", date, shift, station);
-    }
-
-    public Task<decimal?> GetKSalesCash(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValue("SALES_CASH", date, shift, station);
-    }
-
-    public Task<decimal?> GetStationKasAktual(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValue("Station_kas_aktual", date, shift, station);
-    }
-
-    public Task<decimal?> GetMtranToday(DateTimeOffset date, int shift, int station)
-    {
-        return GetSingleValue("SUM(GROSS)", date, shift, station, "mtran");
-    }
-
-    #endregion
+//     private async Task<T?> GetSingleValueAsync<T>(string column, DateTimeOffset date, int shift, int station,
+//         string table = "initial")
+//         where T : struct
+//     {
+//         try
+//         {
+//             await EnsureConnectedAsync();
+//
+//             var query = $"""
+//                          SELECT {column} FROM {table}
+//                          WHERE TANGGAL = @Tanggal AND SHIFT = @Shift AND STATION = @Station
+//                          """;
+//
+//             return await _connection.QueryFirstOrDefaultAsync<T?>(query, new
+//             {
+//                 Tanggal = date.ToString("yyyy-MM-dd"),
+//                 Shift = shift,
+//                 Station = station.ToString("D2")
+//             });
+//         }
+//         catch (Exception e)
+//         {
+//             Console.WriteLine($"[Database Error] {e.Message}");
+//             throw;
+//         }
+//     }
+//
+//     public Task<decimal?> GetKasAktualAsync(DateTimeOffset date, int shift, int station)
+//     {
+//         return GetSingleValueAsync<decimal>("KAS_AKTUAL", date, shift, station);
+//     }
+//
+//     public async Task<string> TestAsync()
+//     {
+//         try
+//         {
+//             await EnsureConnectedAsync();
+//
+//             var query = "SELECT PLU, BARCODE, ADDTIME FROM barcode LIMIT 10"; // Ensure you select a valid column
+//             var result = await _connection.QueryAsync<string>(query);
+//
+//             return result is not null ? string.Join(", ", result) : "No data found.";
+//         }
+//         catch (Exception e)
+//         {
+//             Console.WriteLine($"[Database Test Error] {e.Message}");
+//             return string.Empty;
+//         }
+//     }
 }

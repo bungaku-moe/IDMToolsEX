@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -31,6 +32,9 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            CultureInfo.CurrentCulture = new CultureInfo("id-ID");
+            CultureInfo.CurrentUICulture = new CultureInfo("id-ID");
+
             _hotKeyManager = new HotKeyManager();
             _hotKeySubscription = _hotKeyManager.Register(VirtualKeyCode.VK_HOME, Modifiers.Control);
 

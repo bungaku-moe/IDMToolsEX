@@ -28,6 +28,7 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://IDMToolsEX.GUI/Assets/Icons.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <Style Selector="HeaderedContentControl">
             <Setter Property="Template">
                 <ControlTemplate>
