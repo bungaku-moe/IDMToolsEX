@@ -20,7 +20,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isConnected;
     [ObservableProperty] private string _password = "Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted";
     [ObservableProperty] private string _port = "3306";
-    [ObservableProperty] private string _toggleRestrictionsText = "Disable Restrictions";
+    [ObservableProperty] private string _toggleRestrictionsText = "Matikan Pembatasan Sistem";
     [ObservableProperty] private string _username = "kasir";
 
     public MainWindowViewModel()
@@ -36,12 +36,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            AppendLog($"Starting application: {appName}...");
+            AppendLog($"Memulai aplikasi: {appName}...");
             Process.Start(new ProcessStartInfo(appName) { UseShellExecute = true });
         }
         catch (Exception ex)
         {
-            AppendLog($"Error: Failed to start {appName}. {ex.Message}");
+            AppendLog($"Error: Gagal memulai aplikasi {appName}. {ex.Message}");
         }
     }
 
@@ -50,14 +50,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            AppendLog(IsConnected ? "Disconnecting from the database..." : "Connecting to the database...");
+            AppendLog(IsConnected ? "Memutuskan koneksi ke database..." : "Menghubungkan koneksi ke database...");
 
             _databaseService ??= new DatabaseService(Database, Host, Port, Username, Password);
             IsConnected = await _databaseService.ToggleConnectionAsync();
 
-            AppendLog(IsConnected ? "Connected to the database." : "Disconnected from the database.");
+            AppendLog(IsConnected ? "Tersambung ke database." : "Terputus ke database.");
 
-            // Optional: dispose after disconnect
             if (!IsConnected)
             {
                 _databaseService.Dispose();
@@ -66,11 +65,11 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            AppendLog($"Database connection error: {e.Message}");
+            AppendLog($"Error koneksi ke database: {e.Message}");
         }
         finally
         {
-            DatabaseConnectText = IsConnected ? "Disconnect" : "Connect";
+            DatabaseConnectText = IsConnected ? "Putuskan" : "Sambungkan";
         }
     }
 
@@ -92,7 +91,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (_databaseService == null)
         {
-            AppendLog("Error: Database service is not initialized. Please connect to the database first.");
+            AppendLog("Error: Database belum disambungkan. Sambungkan ke database terlebih dahulu.");
             return;
         }
 
@@ -106,11 +105,11 @@ public partial class MainWindowViewModel : ViewModelBase
         switch (_systemSecurity.ArePoliciesEnabled())
         {
             case true:
-                ToggleRestrictionsText = "Disable Restrictions";
+                ToggleRestrictionsText = "Matikan Pembatasan Sistem";
                 _systemSecurity.DisablePolicies();
                 break;
             case false:
-                ToggleRestrictionsText = "Enable Restrictions";
+                ToggleRestrictionsText = "Pulihkan Pembatasan Sistem";
                 _systemSecurity.EnablePolicies();
                 break;
         }

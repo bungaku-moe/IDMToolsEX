@@ -82,10 +82,10 @@
 
         <HeaderedContentControl Header="IDM Tools" Grid.Row="0" Grid.Column="1" Classes="group-container">
             <WrapPanel>
-                <Button Content="Actual Cash" Classes="tool-item" Command="{Binding OpenActualCashWindowCommand}" />
+                <Button Content="Aktual Kas" Classes="tool-item" Command="{Binding OpenActualCashWindowCommand}" />
                 <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
                         Command="{Binding ToggleRestrictionsCommand}" />
-                <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" />
+                <!-- <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" /> -->
             </WrapPanel>
         </HeaderedContentControl>
 

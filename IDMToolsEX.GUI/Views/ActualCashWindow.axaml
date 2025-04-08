@@ -6,10 +6,9 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.ActualCashWindow"
         x:DataType="vm:ActualCashWindowViewModel"
-        MaxWidth="465" MaxHeight="635" MinWidth="465" MinHeight="635"
+        MaxWidth="465" MaxHeight="660" MinWidth="465" MinHeight="660"
         Icon="/Assets/app-icon.ico"
-        Title="IDMToolsEX - Actual Cash"
-
+        Title="IDMToolsEX - Aktual Kas" 
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 
@@ -18,10 +17,10 @@
     <!-- </Window.DataContext> -->
 
     <StackPanel Margin="20" Spacing="10">
-        <HeaderedContentControl Header="Initial Info">
+        <HeaderedContentControl Header="Initial">
             <StackPanel>
                 <StackPanel HorizontalAlignment="Stretch">
-                    <TextBlock Text="Date:" />
+                    <TextBlock Text="Tanggal:" />
                     <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
                 </StackPanel>
 
@@ -35,14 +34,14 @@
                     <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station}" />
                 </StackPanel>
 
-                <Button Content="Get Sales Info"
+                <Button Content="Ambil Info Sales"
                         Command="{Binding GetSalesInfoCommand}" />
             </StackPanel>
         </HeaderedContentControl>
-        <HeaderedContentControl Header="Calculate">
+        <HeaderedContentControl Header="Kalkulasi">
             <StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Sales Deposit:" />
+                    <TextBlock Text="Total Setoran Sales:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
                         Value="{Binding SalesDeposit}"
@@ -50,15 +49,15 @@
                 </StackPanel>
 
                 <StackPanel>
-                    <TextBlock Text="Actual Cash:" />
+                    <TextBlock Text="Total Cash Kasir:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
-                        Value="{Binding ActualCash}"
+                        Value="{Binding CashierActualCash}"
                         FormatString="C0" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Spacing="20">
-                    <Button Content="Calculate Actual Cash"
+                    <Button Content="Hitung Aktual Kas"
                             Command="{Binding CalculateActualCashCommand}" />
                 </StackPanel>
             </StackPanel>
@@ -67,8 +66,8 @@
                   CanUserResizeColumns="True" CanUserSortColumns="True" HeadersVisibility="Column" Margin="10"
                   IsReadOnly="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" />
+                <DataGridTextColumn Header="Nama" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Nilai" Binding="{Binding Value}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
     </StackPanel>
