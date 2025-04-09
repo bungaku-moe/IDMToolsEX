@@ -8,7 +8,8 @@
         x:DataType="vm:ActualCashWindowViewModel"
         MaxWidth="465" MaxHeight="660" MinWidth="465" MinHeight="660"
         Icon="/Assets/app-icon.ico"
-        Title="IDMToolsEX - Aktual Kas" 
+        Title="IDMToolsEX - Actual Cash"
+
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 
@@ -49,10 +50,10 @@
                 </StackPanel>
 
                 <StackPanel>
-                    <TextBlock Text="Total Cash Kasir:" />
+                    <TextBlock Text="Total Uang Fisik:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
-                        Value="{Binding CashierActualCash}"
+                        Value="{Binding ActualCash}"
                         FormatString="C0" />
                 </StackPanel>
 
@@ -66,7 +67,7 @@
                   CanUserResizeColumns="True" CanUserSortColumns="True" HeadersVisibility="Column" Margin="10"
                   IsReadOnly="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Nama" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
                 <DataGridTextColumn Header="Nilai" Binding="{Binding Value}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>

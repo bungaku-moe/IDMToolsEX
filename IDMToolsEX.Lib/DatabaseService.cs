@@ -31,6 +31,7 @@ public class DatabaseService : IDisposable
         if (_connection.State != ConnectionState.Open) await _connection.OpenAsync();
     }
 
+
     public async Task<bool> ToggleConnectionAsync()
     {
         if (IsConnected)
@@ -56,29 +57,28 @@ public class DatabaseService : IDisposable
         return IsConnected;
     }
 
-    public async Task<(decimal totalConsumentCash, decimal totalChangeCash, decimal totalExpectedCash)>
-        GetActualCashAsync(
-            DateTimeOffset date, int shift, int station)
+
+    public async Task<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)> GetExpectedActualCashAsync(
+        DateTimeOffset date, int shift, int station)
     {
         await EnsureConnectedAsync();
 
         const string query = @"
-            SELECT
-                IFNULL(SUM(NILAI), 0) AS totalConsumentCash,
-                IFNULL(SUM(KEMBALI), 0) AS totalChangeCash,
-                IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalExpectedCash
-            FROM bayar
-            WHERE
-                TANGGAL = @Tanggal AND
-                SHIFT = @Shift AND
-                TIPE = 'CSH' AND
-                STATION = @Station;
-        ";
+        SELECT
+            IFNULL(SUM(NILAI), 0) AS totalCash,
+            IFNULL(SUM(KEMBALI), 0) AS changeCash,
+            IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalSalesCash
+        FROM bayar
+        WHERE
+            TANGGAL = @Tanggal AND
+            SHIFT = @Shift AND
+            TIPE = 'CSH' AND
+            STATION = @Station;
+    ";
 
         var result =
             await _connection
-                .QuerySingleOrDefaultAsync<(decimal totalConsumentCash, decimal totalChangeCash, decimal
-                    totalExpectedCash)?>(
+                .QuerySingleOrDefaultAsync<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)?>(
                     query,
                     new
                     {
@@ -87,16 +87,20 @@ public class DatabaseService : IDisposable
                         Station = station.ToString("D2")
                     });
 
-        return result ?? (0, 0, 0);
+        // Null check: If result is null, return 0s
+        if (result is null)
+            return (0, 0, 0);
+
+        return result.Value;
     }
 
-    public async Task<decimal> GetTotalDebitCashoutAsync(DateTimeOffset date, int shift, int station)
+    public async Task<decimal?> GetTotalCashoutAsync(DateTimeOffset date, int shift, int station)
     {
         await EnsureConnectedAsync();
 
         const string query = @"
             SELECT
-                IFNULL(SUM(TUNAI), 0) AS debitCashout
+                IFNULL(SUM(TUNAI), 0) AS totalCashout
             FROM bayar
             WHERE
                 TANGGAL = @Tanggal AND
@@ -104,12 +108,15 @@ public class DatabaseService : IDisposable
                 STATION = @Station;
         ";
 
-        var result = await _connection.QuerySingleOrDefaultAsync<decimal>(query, new
+        var result = await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new
         {
             Tanggal = date.ToString("yyyy-MM-dd"),
             Shift = shift,
             Station = station.ToString("D2")
         });
+
+        if (result is null)
+            return 0;
 
         return result;
     }
