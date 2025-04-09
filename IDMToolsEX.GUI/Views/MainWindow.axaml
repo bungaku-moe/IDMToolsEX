@@ -33,63 +33,59 @@
     </Window.Styles>
 
     <Grid ColumnDefinitions="1.5*, 1*" RowDefinitions="1*, 1*">
-        <HeaderedContentControl Header="Auth" Grid.Row="0" Grid.Column="0" Classes="group-container">
-            <Grid ColumnDefinitions="1*, 1*" RowDefinitions="1*, 1*">
-                <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="Auto, Auto, Auto"
-                      RowDefinitions="Auto, Auto, Auto"
-                      Margin="4">
-                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="20 5" MinWidth="100">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Database:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabaseNameTextBox" FilterMode="StartsWith" Watermark="pos"
-                                         Text="{Binding Database}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="20 5" MinWidth="120">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Host:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabaseHostTextBox" FilterMode="StartsWith" Watermark="10.52.76.66"
-                                         Text="{Binding Host}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" MinWidth="80">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Port:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabasePortTextBox" FilterMode="StartsWith" Watermark="3306"
-                                         Text="{Binding Port}" />
-                    </StackPanel>
-                </Grid>
-                <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="Auto, Auto, Auto"
-                      RowDefinitions="Auto, Auto, Auto"
-                      Margin="4">
-                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="20 5" MinWidth="80">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Username:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabaseUsernameTextBox" FilterMode="StartsWith" Watermark="kasir"
-                                         Text="{Binding Username}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="20 5" MaxWidth="150">
-                        <TextBlock Margin="0 5" FontWeight="Bold">Password:</TextBlock>
-                        <AutoCompleteBox x:Name="DatabasePasswordTextBox" FilterMode="StartsWith"
-                                         Watermark="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted"
-                                         Text="{Binding Password}" />
-                    </StackPanel>
-                    <!-- Aligning the Connect button properly -->
-                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                        <Button Width="120" Height="42" HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center" FontSize="16" FontWeight="Bold"
-                                Command="{Binding ToggleDatabaseConnectionCommand}"
-                                Content="{Binding DatabaseConnectText}" />
-                    </StackPanel>
-                </Grid>
+        <HeaderedContentControl Header="Database" Grid.Row="0" Grid.Column="0" Classes="group-container">
+            <Grid ColumnDefinitions="1*, 1*, 1*" RowDefinitions="Auto, Auto">
+                <!-- First Row -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="20 5" MinWidth="100">
+                    <TextBlock Margin="0 5" FontWeight="Bold">Schema:</TextBlock>
+                    <AutoCompleteBox x:Name="DatabaseNameTextBox" FilterMode="StartsWith" Watermark="pos"
+                                     Text="{Binding Database}" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="20 5" MinWidth="120">
+                    <TextBlock Margin="0 5" FontWeight="Bold">Host:</TextBlock>
+                    <AutoCompleteBox x:Name="DatabaseHostTextBox" FilterMode="StartsWith" Watermark="10.52.76.66"
+                                     Text="{Binding Host}" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Margin="20 5" MinWidth="80">
+                    <TextBlock Margin="0 5" FontWeight="Bold">Port:</TextBlock>
+                    <AutoCompleteBox x:Name="DatabasePortTextBox" FilterMode="StartsWith" Watermark="3306"
+                                     Text="{Binding Port}" />
+                </StackPanel>
+
+                <!-- Second Row -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="20 5" MinWidth="80">
+                    <TextBlock Margin="0 5" FontWeight="Bold">Username:</TextBlock>
+                    <AutoCompleteBox x:Name="DatabaseUsernameTextBox" FilterMode="StartsWith" Watermark="kasir"
+                                     Text="{Binding Username}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="20 5" MinWidth="120">
+                    <TextBlock Margin="0 5" FontWeight="Bold">Password:</TextBlock>
+                    <AutoCompleteBox x:Name="DatabasePasswordTextBox" FilterMode="StartsWith"
+                                     Watermark="Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted"
+                                     Text="{Binding Password}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="20 5" HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom">
+                    <Button Width="120" Height="42" HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center" FontSize="16" FontWeight="Bold"
+                            Command="{Binding ToggleDatabaseConnectionCommand}"
+                            Content="{Binding DatabaseConnectText}" />
+                </StackPanel>
             </Grid>
         </HeaderedContentControl>
-
-        <HeaderedContentControl Header="IDM Tools" Grid.Row="0" Grid.Column="1" Classes="group-container">
+        
+        <HeaderedContentControl Header="Alat-Alat Indomaret" Grid.Row="0" Grid.Column="1" Classes="group-container">
             <WrapPanel>
-                <Button Content="Aktual Kas" Classes="tool-item" Command="{Binding OpenActualCashWindowCommand}" />
+                <Button Content="Aktual Kas" Classes="tool-item" Command="{Binding OpenWindowCommand}" CommandParameter="ActualCashWindow" />
                 <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
                         Command="{Binding ToggleRestrictionsCommand}" />
+                <!-- <Button Content="Cek Harga" Classes="tool-item"></Button> -->
+                <Button Content="Lihat Barcode" Classes="tool-item" Command="{Binding OpenWindowCommand}" CommandParameter="BarcodeWindow"></Button>
                 <!-- <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" /> -->
             </WrapPanel>
         </HeaderedContentControl>
 
-        <HeaderedContentControl Header="Windows Tools" Grid.Row="1" Grid.Column="1" Classes="group-container">
+        <HeaderedContentControl Header="Alat-Alat Windows" Grid.Row="1" Grid.Column="1" Classes="group-container">
             <ScrollViewer>
                 <WrapPanel Orientation="Horizontal">
                     <Button Classes="tool-item" Content="Calculator" Command="{Binding OpenAppCommand}"

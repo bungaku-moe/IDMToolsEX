@@ -19,7 +19,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
     [ObservableProperty] private string? _actualCash = "0";
     [ObservableProperty] private int _shift = 1;
     [ObservableProperty] private int _station = 1;
-    [ObservableProperty] private decimal? _totalCash = 0;
+    [ObservableProperty] private decimal? _totalConsumentCash = 0;
     [ObservableProperty] private decimal? _totalChangeCash = 0;
     [ObservableProperty] private decimal? _expectedActualCash = 0;
     [ObservableProperty] private decimal? _variance = 0;
@@ -33,7 +33,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
         _databaseService = databaseService;
         _mainWindowViewModel = mainWindowViewModel;
 
-        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(TotalCash) });
+        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(TotalConsumentCash) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(TotalChangeCash) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(TotalCashout) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(CashModal) });
@@ -44,17 +44,17 @@ public partial class ActualCashWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task GetSalesInfo()
     {
-        _mainWindowViewModel.AppendLog("Getting sales info...");
+        _mainWindowViewModel.AppendLog("Mendapatkan informasi sales...");
         if (!_databaseService.IsConnected)
         {
-            _mainWindowViewModel.AppendLog("Failed to get sales info. Database not connected!");
+            _mainWindowViewModel.AppendLog("Gagal mendapatkan informasi sales! Database tidak terhubung.");
             return;
         }
 
         var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift, Station);
-        TotalCash = result.totalCash;
+        TotalConsumentCash = result.totalConsumentCash;
         TotalChangeCash = result.totalChangeCash;
-        ExpectedActualCash = result.totalSalesCash;
+        ExpectedActualCash = result.totalActualCash;
         TotalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift, Station);
     }
 
@@ -64,11 +64,11 @@ public partial class ActualCashWindowViewModel : ViewModelBase
         var salesDepositDecimal = ParseDecimal(SalesDeposit);
         var actualCashDecimal = ParseDecimal(ActualCash);
 
-        ExpectedActualCash = TotalCash - (TotalChangeCash + salesDepositDecimal + TotalCashout + CashModal);
+        ExpectedActualCash = TotalConsumentCash - (TotalChangeCash + salesDepositDecimal + TotalCashout + CashModal);
         Variance = actualCashDecimal - ExpectedActualCash;
     }
 
-    partial void OnTotalCashChanged(decimal? value)
+    partial void OnTotalConsumentCashChanged(decimal? value)
     {
         CashSummaryRows[0].Value = FormatCurrency(value);
         CashSummaryRows[0].NotifyValueChanged();

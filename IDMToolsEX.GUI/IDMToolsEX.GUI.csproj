@@ -6,6 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,6 +31,7 @@
         <PackageReference Include="FlaUI.UIA2" Version="5.0.0"/>
         <PackageReference Include="GlobalHotKeys.Windows" Version="0.1.0"/>
         <PackageReference Include="MySqlConnector" Version="2.4.0"/>
+        <PackageReference Include="ZXing.Net" Version="0.16.10" />
     </ItemGroup>
 
     <ItemGroup>

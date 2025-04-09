@@ -9,7 +9,6 @@
         MaxWidth="465" MaxHeight="660" MinWidth="465" MinHeight="660"
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Actual Cash"
-
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 

@@ -12,7 +12,7 @@ public class DatabaseService : IDisposable
     public DatabaseService(string database, string host, string port, string username, string password)
     {
         _connectionString =
-            $"Database={database};Server={host};Port={port};User Id={username};Password={password};Allow User Variables=true;Persist Security Info=True;Pooling=true;Connection Timeout=30;";
+            $"Database={database};Server={host};Port={port};User Id={username};Password={password};Allow User Variables=true;Persist Security Info=True;Pooling=true;Connection Timeout=15;";
     }
 
     public bool IsConnected { get; private set; }
@@ -58,16 +58,17 @@ public class DatabaseService : IDisposable
     }
 
 
-    public async Task<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)> GetExpectedActualCashAsync(
-        DateTimeOffset date, int shift, int station)
+    public async Task<(decimal totalConsumentCash, decimal totalChangeCash, decimal totalActualCash)>
+        GetExpectedActualCashAsync(
+            DateTimeOffset date, int shift, int station)
     {
         await EnsureConnectedAsync();
 
         const string query = @"
         SELECT
-            IFNULL(SUM(NILAI), 0) AS totalCash,
-            IFNULL(SUM(KEMBALI), 0) AS changeCash,
-            IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalSalesCash
+            IFNULL(SUM(NILAI), 0) AS totalConsumentCash,
+            IFNULL(SUM(KEMBALI), 0) AS totalChangeCash,
+            IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalActualCash
         FROM bayar
         WHERE
             TANGGAL = @Tanggal AND
@@ -78,7 +79,8 @@ public class DatabaseService : IDisposable
 
         var result =
             await _connection
-                .QuerySingleOrDefaultAsync<(decimal totalCash, decimal totalChangeCash, decimal totalSalesCash)?>(
+                .QuerySingleOrDefaultAsync<(decimal totalConsumentCash, decimal totalChangeCash, decimal totalActualCash
+                    )?>(
                     query,
                     new
                     {
@@ -87,7 +89,6 @@ public class DatabaseService : IDisposable
                         Station = station.ToString("D2")
                     });
 
-        // Null check: If result is null, return 0s
         if (result is null)
             return (0, 0, 0);
 
@@ -117,6 +118,21 @@ public class DatabaseService : IDisposable
 
         if (result is null)
             return 0;
+
+        return result;
+    }
+
+    public async Task<string?> GetBarcodeAsync(string plu)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = @"
+            SELECT BARCD
+            FROM barcode
+            WHERE PLU = @Plu;
+        ";
+
+        var result = await _connection.QuerySingleOrDefaultAsync<string?>(query, new { Plu = plu });
 
         return result;
     }

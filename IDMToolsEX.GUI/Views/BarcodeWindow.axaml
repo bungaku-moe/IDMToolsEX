@@ -1,0 +1,40 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IDMToolsEX.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
+        x:Class="IDMToolsEX.Views.BarcodeWindow"
+        x:DataType="vm:BarcodeWindowViewModel"
+        MaxWidth="600" MaxHeight="600" MinWidth="600" MinHeight="600"
+        Icon="/Assets/app-icon.ico"
+        Title="IDMToolsEX - Barcode"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="WhiteSmoke">
+    <Grid RowDefinitions="1*, 2*">
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <ScrollViewer MaxHeight="300" MaxWidth="350">
+                    <TextBox Name="PluListTextBox" Text="{Binding PluList}"></TextBox>
+                </ScrollViewer>
+                <Button Content="Generate Barcode" Command="{Binding GenerateBarcodeCommand}" />
+                <!-- <Button Content="Save Barcode" Command="{Binding SaveBarcodeCommand}" /> -->
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <DataGrid ItemsSource="{Binding BarcodeList}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="*" />
+                    <DataGridTextColumn Header="Barcode Text" Binding="{Binding BarcodeText}" Width="*" />
+                    <DataGridTemplateColumn Header="Barcode Image" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding BarcodeImage}" MaxHeight="50" MaxWidth="150" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>
