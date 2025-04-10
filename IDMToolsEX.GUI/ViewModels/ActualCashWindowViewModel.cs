@@ -11,35 +11,38 @@ namespace IDMToolsEX.ViewModels;
 public partial class ActualCashWindowViewModel : ViewModelBase
 {
     private readonly DatabaseService _databaseService;
-    private readonly MainWindowViewModel _mainWindowViewModel;
     private readonly CultureInfo _idrCulture = new("id-ID");
-
-    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
-    [ObservableProperty] private string? _salesDeposit = "0";
+    private readonly MainWindowViewModel _mainWindowViewModel;
     [ObservableProperty] private string? _actualCash = "0";
-    [ObservableProperty] private int _shift = 1;
-    [ObservableProperty] private int _station = 1;
-    [ObservableProperty] private decimal? _totalConsumentCash = 0;
-    [ObservableProperty] private decimal? _totalChangeCash = 0;
-    [ObservableProperty] private decimal? _expectedActualCash = 0;
-    [ObservableProperty] private decimal? _variance = 0;
-    [ObservableProperty] private decimal? _totalCashout;
     [ObservableProperty] private decimal? _cashModal = 100000;
 
-    public ObservableCollection<CashSummaryRow> CashSummaryRows { get; set; } = [];
+    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
+    [ObservableProperty] private decimal? _expectedActualCash = 0;
+    [ObservableProperty] private string? _salesDeposit = "0";
+    [ObservableProperty] private int _shift = 1;
+    [ObservableProperty] private int _station = 1;
+    [ObservableProperty] private decimal? _totalCashout;
+    [ObservableProperty] private decimal? _totalChangeCash = 0;
+    [ObservableProperty] private decimal? _totalConsumentCash = 0;
+    [ObservableProperty] private decimal? _variance = 0;
 
     public ActualCashWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         _databaseService = databaseService;
         _mainWindowViewModel = mainWindowViewModel;
 
-        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(TotalConsumentCash) });
-        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(TotalChangeCash) });
-        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(TotalCashout) });
+        CashSummaryRows.Add(new CashSummaryRow
+            { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(TotalConsumentCash) });
+        CashSummaryRows.Add(new CashSummaryRow
+            { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(TotalChangeCash) });
+        CashSummaryRows.Add(new CashSummaryRow
+            { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(TotalCashout) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(CashModal) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "Aktual Kas", Value = FormatCurrency(ExpectedActualCash) });
         CashSummaryRows.Add(new CashSummaryRow { Name = "Variance", Value = FormatCurrency(Variance) });
     }
+
+    public ObservableCollection<CashSummaryRow> CashSummaryRows { get; set; } = [];
 
     [RelayCommand]
     private async Task GetSalesInfo()

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using ZXing;
 using ZXing.Common;
@@ -7,30 +8,31 @@ namespace IDMToolsEX.Utility;
 
 public static class BarcodeGenerator
 {
-    public static Bitmap GenerateBarcodeImage(string text)
+    public static async Task<Bitmap?> GenerateBarcodeImageAsync(string text)
     {
-        var writer = new BarcodeWriterPixelData
+        return await Task.Run(() =>
         {
-            Format = BarcodeFormat.CODE_128,
-            Options = new EncodingOptions
+            var writer = new BarcodeWriterPixelData
             {
-                Height = 100,
-                Width = 300,
-                Margin = 10
-            }
-        };
+                Format = BarcodeFormat.CODE_128,
+                Options = new EncodingOptions
+                {
+                    Height = 500,
+                    Width = 1500,
+                    Margin = 5
+                }
+            };
 
-        var pixelData = writer.Write(text);
+            var pixelData = writer.Write(text);
 
-        using var stream = new MemoryStream();
-        var bitmap = new Avalonia.Media.Imaging.WriteableBitmap(
-            new Avalonia.PixelSize(pixelData.Width, pixelData.Height),
-            new Avalonia.Vector(96, 96),
-            Avalonia.Platform.PixelFormat.Bgra8888,
-            Avalonia.Platform.AlphaFormat.Premul);
+            using var stream = new MemoryStream();
+            var bitmap = new Avalonia.Media.Imaging.WriteableBitmap(
+                new Avalonia.PixelSize(pixelData.Width, pixelData.Height),
+                new Avalonia.Vector(96, 96),
+                Avalonia.Platform.PixelFormat.Bgra8888,
+                Avalonia.Platform.AlphaFormat.Premul);
 
-        using (var lockedBuffer = bitmap.Lock())
-        {
+            using var lockedBuffer = bitmap.Lock();
             unsafe
             {
                 var buffer = (uint*)lockedBuffer.Address;
@@ -45,12 +47,12 @@ public static class BarcodeGenerator
                             pixelData.Pixels[offset + 1],
                             pixelData.Pixels[offset]);
 
-                        buffer[(y * lockedBuffer.RowBytes / 4) + x] = color.ToUint32();
+                        buffer[(y * lockedBuffer.RowBytes / 4) + x] = color.ToUInt32();
                     }
                 }
             }
-        }
 
-        return bitmap;
+            return bitmap;
+        });
     }
 }

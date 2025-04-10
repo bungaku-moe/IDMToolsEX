@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.Utility;
-using IDMToolsEX.Views;
 
 namespace IDMToolsEX.ViewModels;
 

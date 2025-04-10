@@ -11,11 +11,19 @@ namespace IDMToolsEX.ViewModels;
 
 public partial class BarcodeWindowViewModel : ViewModelBase
 {
-    private readonly MainWindowViewModel _mainWindowViewModel;
     private readonly DatabaseService _databaseService;
+    private readonly MainWindowViewModel _mainWindowViewModel;
 
     [ObservableProperty] private string _pluList = string.Empty;
-    public ObservableCollection<Barcode> BarcodeList { get; set; } = new();
+    public ObservableCollection<Barcode> BarcodeList { get; set; } = [];
+
+    public ObservableCollection<string> RakOptions { get; set; } = [];
+    [ObservableProperty] private string _selectedRakFirst;
+    [ObservableProperty] private string _selectedRakLast;
+
+    public ObservableCollection<string> ModisOptions { get; set; } = [];
+    [ObservableProperty] private string _selectedModisFirst;
+    [ObservableProperty] private string _selectedModisLast;
 
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -24,27 +32,36 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task GenerateBarcodeCommand()
+    private async Task GenerateBarcode()
     {
-        var pluArray = PluList.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        foreach (string plu in pluArray)
+        BarcodeList.Clear();
+        var pluArray = PluList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        foreach (var plu in pluArray)
         {
-            var barcodeText = plu; // Use PLU as the barcode text
-            // var barcodeImage =
-            //     BarcodeGenerator.GenerateBarcodeImage(barcodeText); // Generate barcode image using ZXing.Net
+            var details = await _databaseService.GetDescriptionAsync(plu);
+            var barcodes = await _databaseService.GetBarcodesAsync(plu);
 
-            BarcodeList.Add(new Barcode
+            foreach (var barcode in barcodes)
             {
-                Plu = plu,
-                BarcodeText = barcodeText
-            });
+                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
+                BarcodeList.Add(new Barcode
+                {
+                    Plu = plu,
+                    Abbreviation = details.Abbreviation ?? "NO ABBREVIATION",
+                    Description = details.Description ?? "NO DESCRIPTION",
+                    BarcodeText = barcode,
+                    BarcodeImage = barcodeImage
+                });
+            }
         }
     }
 }
 
 public partial class Barcode : ObservableObject
 {
-    [ObservableProperty] private string _plu = string.Empty;
-    [ObservableProperty] private string _barcodeText = string.Empty;
+    [ObservableProperty] private string _abbreviation = string.Empty;
     [ObservableProperty] private Bitmap? _barcodeImage;
+    [ObservableProperty] private string _barcodeText = string.Empty;
+    [ObservableProperty] private string _description = string.Empty;
+    [ObservableProperty] private string _plu = string.Empty;
 }

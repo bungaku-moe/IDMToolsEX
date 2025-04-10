@@ -122,18 +122,19 @@ public class DatabaseService : IDisposable
         return result;
     }
 
-    public async Task<string?> GetBarcodeAsync(string plu)
+    public async Task<IEnumerable<string>> GetBarcodesAsync(string plu)
     {
         await EnsureConnectedAsync();
 
-        const string query = @"
-            SELECT BARCD
-            FROM barcode
-            WHERE PLU = @Plu;
-        ";
+        var query = "SELECT BARCD FROM barcode WHERE PLU = @Plu;";
+        return await _connection.QueryAsync<string>(query, new { Plu = plu });
+    }
 
-        var result = await _connection.QuerySingleOrDefaultAsync<string?>(query, new { Plu = plu });
+    public async Task<(string? Description, string? Abbreviation)> GetDescriptionAsync(string plu)
+    {
+        await EnsureConnectedAsync();
 
-        return result;
+        var query = "SELECT DESC2, SINGKATAN FROM prodmast WHERE PRDCD = @Plu;";
+        return await _connection.QuerySingleOrDefaultAsync<(string?, string?)>(query, new { Plu = plu });
     }
 }

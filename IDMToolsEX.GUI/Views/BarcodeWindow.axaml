@@ -6,30 +6,75 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.BarcodeWindow"
         x:DataType="vm:BarcodeWindowViewModel"
-        MaxWidth="600" MaxHeight="600" MinWidth="600" MinHeight="600"
+        MinWidth="800" MinHeight="600"
         Icon="/Assets/app-icon.ico"
-        Title="IDMToolsEX - Barcode"
+        Title="IDMToolsEX - Barcode Generator"
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
     <Grid RowDefinitions="1*, 2*">
-        <Grid Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="20">
-                <ScrollViewer MaxHeight="300" MaxWidth="350">
-                    <TextBox Name="PluListTextBox" Text="{Binding PluList}"></TextBox>
-                </ScrollViewer>
-                <Button Content="Generate Barcode" Command="{Binding GenerateBarcodeCommand}" />
-                <!-- <Button Content="Save Barcode" Command="{Binding SaveBarcodeCommand}" /> -->
-            </StackPanel>
+        <Grid Grid.Row="0" Margin="4">
+            <Grid ColumnDefinitions="1*, 2*">
+                <Grid Grid.Column="0">
+                    <HeaderedContentControl Header="PLU Kustom">
+                        <StackPanel Spacing="2">
+                            <ScrollViewer MaxHeight="150" MaxWidth="400" MinHeight="150" MinWidth="400">
+                                <TextBox Name="PluListTextBox" Text="{Binding PluList}" AcceptsReturn="True"
+                                         TextWrapping="Wrap" HorizontalAlignment="Stretch" Margin="0" />
+                            </ScrollViewer>
+                            <Button Content="Generate Barcode" Command="{Binding GenerateBarcodeCommand}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        </StackPanel>
+                    </HeaderedContentControl>
+                </Grid>
+                <Grid Grid.Column="1">
+                    <HeaderedContentControl Header="Display Barang">
+                        <Grid RowDefinitions="0.5*, 2*">
+                            <Grid Grid.Row="0">
+                                <Grid ColumnDefinitions="2*, 0.5*">
+                                    <Grid Grid.Column="0">
+                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                            <TextBlock>Rak:</TextBlock>
+                                            <ComboBox ItemsSource="{Binding RakOptions}"
+                                                      SelectedItem="{Binding SelectedRakFirst}" />
+                                            <TextBlock>Sampai:</TextBlock>
+                                            <ComboBox ItemsSource="{Binding RakOptions}"
+                                                      SelectedItem="{Binding SelectedRakLast}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                            <TextBlock>Modis:</TextBlock>
+                                            <ComboBox ItemsSource="{Binding ModisOptions}"
+                                                      SelectedItem="{Binding SelectedModisFirst}" />
+                                            <TextBlock>Sampai:</TextBlock>
+                                            <ComboBox ItemsSource="{Binding ModisOptions}"
+                                                      SelectedItem="{Binding SelectedModisLast}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Grid Grid.Column="1">
+                                        <Button Content="Generate Barcode"></Button>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid Grid.Row="1">
+
+                            </Grid>
+                        </Grid>
+                    </HeaderedContentControl>
+                </Grid>
+            </Grid>
         </Grid>
         <Grid Grid.Row="1">
-            <DataGrid ItemsSource="{Binding BarcodeList}" AutoGenerateColumns="False">
+            <DataGrid ItemsSource="{Binding BarcodeList}" AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="*" />
-                    <DataGridTextColumn Header="Barcode Text" Binding="{Binding BarcodeText}" Width="*" />
-                    <DataGridTemplateColumn Header="Barcode Image" Width="*">
+                    <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.3*" />
+                    <DataGridTextColumn Header="SINGKATAN" Binding="{Binding Abbreviation}" Width="1*" />
+                    <DataGridTextColumn Header="DESKRIPSI" Binding="{Binding Description}" Width="1.5*" />
+                    <DataGridTextColumn Header="BARCODE" Binding="{Binding BarcodeText}" Width="1*" />
+                    <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding BarcodeImage}" MaxHeight="50" MaxWidth="150" />
+                                <Image Source="{Binding BarcodeImage}" MinWidth="280" MaxHeight="220" MaxWidth="350"
+                                       Margin="12" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
