@@ -1,7 +1,11 @@
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using IDMToolsEX.Models;
+using IDMToolsEX.Utility;
+using IDMToolsEX.ViewModels;
 
 namespace IDMToolsEX.Views;
 
@@ -21,8 +25,9 @@ public partial class MainWindow : Window
         Initialization();
         Closed += (_, _) =>
         {
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                desktop.MainWindow = null;
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+            UpdateSettings();
+            desktop.MainWindow = null;
         };
     }
 
@@ -33,5 +38,26 @@ public partial class MainWindow : Window
         DatabasePortTextBox.ItemsSource = _databasePortsSuggestion.OrderBy(x => x);
         DatabaseUsernameTextBox.ItemsSource = _databaseUsernameSuggestion.OrderBy(x => x);
         DatabasePasswordTextBox.ItemsSource = _databasePasswordsSuggestion.OrderBy(x => x);
+    }
+
+    private void UpdateSettings()
+    {
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime application) return;
+
+        var mainWindow = application.MainWindow.DataContext as MainWindowViewModel;
+        var settingsLoader = new SettingsLoader();
+        var settings = new
+        {
+            DatabaseCredentials = new DatabaseCredentials
+            {
+                Database = DatabaseNameTextBox.Text,
+                Server = DatabaseHostTextBox.Text,
+                Port = Convert.ToInt16(DatabasePortTextBox.Text),
+                Username = DatabaseUsernameTextBox.Text,
+                Password = DatabasePasswordTextBox.Text
+            }
+        };
+        mainWindow.Settings.DatabaseCredentials = settings.DatabaseCredentials;
+        settingsLoader.SaveSettings(mainWindow.Settings);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics;
 using Dapper;
 using MySqlConnector;
 
@@ -24,39 +25,59 @@ public class DatabaseService : IDisposable
 
     private async Task EnsureConnectedAsync()
     {
-        if (!IsConnected) return;
-
-        if (_connection == null) _connection = new MySqlConnection(_connectionString);
-
-        if (_connection.State != ConnectionState.Open) await _connection.OpenAsync();
-    }
-
-
-    public async Task<bool> ToggleConnectionAsync()
-    {
-        if (IsConnected)
+        try
         {
-            if (_connection != null)
+            _connection ??= new MySqlConnection(_connectionString);
+
+            if (_connection.State != ConnectionState.Open)
             {
-                await _connection.CloseAsync();
-                await _connection.DisposeAsync();
-                _connection = null;
+                Debug.WriteLine("Attempting to open MySQL connection...");
+                await _connection.OpenAsync();
+                Debug.WriteLine("MySQL connection opened successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("MySQL OpenAsync failed.");
+            Debug.WriteLine("Exception: " + ex.Message);
+            Debug.WriteLine("StackTrace: " + ex.StackTrace);
+            if (ex.InnerException != null)
+            {
+                Debug.WriteLine("InnerException: " + ex.InnerException.Message);
             }
 
-            IsConnected = false;
+            throw; // Rethrow so you can see it in ConnectAsync too if needed
         }
-        else
-        {
-            IsConnected = true; // Set before calling EnsureConnectedAsync
-            await EnsureConnectedAsync();
+    }
 
-            // If EnsureConnectedAsync fails, we assume connection was unsuccessful
-            if (_connection?.State != ConnectionState.Open) IsConnected = false;
+    public async Task<bool> ConnectAsync()
+    {
+        try
+        {
+            await EnsureConnectedAsync();
+            IsConnected = _connection?.State == ConnectionState.Open;
+            Debug.WriteLine("Connection result: " + IsConnected);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("ConnectAsync caught exception: " + ex.Message);
+            IsConnected = false;
         }
 
         return IsConnected;
     }
 
+    public async Task DisconnectAsync()
+    {
+        if (_connection != null)
+        {
+            await _connection.CloseAsync();
+            await _connection.DisposeAsync();
+            _connection = null;
+        }
+
+        IsConnected = false;
+    }
 
     public async Task<(decimal totalConsumentCash, decimal totalChangeCash, decimal totalActualCash)>
         GetExpectedActualCashAsync(
@@ -64,18 +85,18 @@ public class DatabaseService : IDisposable
     {
         await EnsureConnectedAsync();
 
-        const string query = @"
-        SELECT
-            IFNULL(SUM(NILAI), 0) AS totalConsumentCash,
-            IFNULL(SUM(KEMBALI), 0) AS totalChangeCash,
-            IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalActualCash
-        FROM bayar
-        WHERE
-            TANGGAL = @Tanggal AND
-            SHIFT = @Shift AND
-            TIPE = 'CSH' AND
-            STATION = @Station;
-    ";
+        const string query = """
+                             SELECT
+                                 IFNULL(SUM(NILAI), 0) AS totalConsumentCash,
+                                 IFNULL(SUM(KEMBALI), 0) AS totalChangeCash,
+                                 IFNULL(SUM(NILAI), 0) - IFNULL(SUM(KEMBALI), 0) AS totalActualCash
+                             FROM bayar
+                             WHERE
+                                 TANGGAL = @Tanggal AND
+                                 SHIFT = @Shift AND
+                                 TIPE = 'CSH' AND
+                                 STATION = @Station;
+                             """;
 
         var result =
             await _connection
@@ -99,15 +120,15 @@ public class DatabaseService : IDisposable
     {
         await EnsureConnectedAsync();
 
-        const string query = @"
-            SELECT
-                IFNULL(SUM(TUNAI), 0) AS totalCashout
-            FROM bayar
-            WHERE
-                TANGGAL = @Tanggal AND
-                SHIFT = @Shift AND
-                STATION = @Station;
-        ";
+        const string query = """
+                             SELECT
+                                 IFNULL(SUM(TUNAI), 0) AS totalCashout
+                             FROM bayar
+                             WHERE
+                                 TANGGAL = @Tanggal AND
+                                 SHIFT = @Shift AND
+                                 STATION = @Station;
+                             """;
 
         var result = await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new
         {
@@ -126,15 +147,52 @@ public class DatabaseService : IDisposable
     {
         await EnsureConnectedAsync();
 
-        var query = "SELECT BARCD FROM barcode WHERE PLU = @Plu;";
+        const string query = "SELECT BARCD FROM barcode WHERE PLU = @Plu;";
         return await _connection.QueryAsync<string>(query, new { Plu = plu });
     }
 
-    public async Task<(string? Description, string? Abbreviation)> GetDescriptionAsync(string plu)
+    public async Task<(string? Description, string? Abbreviation)> GetProductDescriptionAsync(string plu)
     {
         await EnsureConnectedAsync();
 
-        var query = "SELECT DESC2, SINGKATAN FROM prodmast WHERE PRDCD = @Plu;";
+        const string query = "SELECT DESC2, SINGKATAN FROM prodmast WHERE PRDCD = @Plu;";
         return await _connection.QuerySingleOrDefaultAsync<(string?, string?)>(query, new { Plu = plu });
+    }
+
+    public async Task<IEnumerable<(string shelfName, string shelfDescription)>> GetModisAsync()
+    {
+        await EnsureConnectedAsync();
+
+        const string query = "SELECT DISTINCT NAMA_RAK, KET_RAK FROM _rak_temp ORDER BY NAMA_RAK;";
+        return await _connection.QueryAsync<(string, string)>(query);
+    }
+
+    public async Task<IEnumerable<string>> GetShelfNumbersAsync(string shelfName)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT DISTINCT NOSHELF
+                             FROM _rak_temp
+                             WHERE NAMA_RAK = @ShelfName
+                             ORDER BY NOSHELF ASC;
+                             """;
+
+        return await _connection.QueryAsync<string>(query, new { ShelfName = shelfName });
+    }
+
+    public async Task<IEnumerable<string>> GetShelfPluAsync(string shelfName, string shelfNumberFrom,
+        string shelfNumberTo)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT PLUMD
+                             FROM _rak_temp
+                             WHERE NAMA_RAK = @ShelfName AND NOSHELF BETWEEN @ShelfNumberFrom AND @ShelfNumberTo;
+                             """;
+
+        return await _connection.QueryAsync<string>(query,
+            new { ShelfName = shelfName, ShelfNumberFrom = shelfNumberFrom, ShelfNumberTo = shelfNumberTo });
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,17 +14,16 @@ public partial class BarcodeWindowViewModel : ViewModelBase
 {
     private readonly DatabaseService _databaseService;
     private readonly MainWindowViewModel _mainWindowViewModel;
-
+    [ObservableProperty] private ObservableCollection<Barcode> _barcodeList = [];
+    [ObservableProperty] private ObservableCollection<(string, string)> _modisOptions = [];
+    [ObservableProperty] private ObservableCollection<string> _modisShelfNames = [];
     [ObservableProperty] private string _pluList = string.Empty;
-    public ObservableCollection<Barcode> BarcodeList { get; set; } = [];
 
-    public ObservableCollection<string> RakOptions { get; set; } = [];
-    [ObservableProperty] private string _selectedRakFirst;
-    [ObservableProperty] private string _selectedRakLast;
-
-    public ObservableCollection<string> ModisOptions { get; set; } = [];
-    [ObservableProperty] private string _selectedModisFirst;
-    [ObservableProperty] private string _selectedModisLast;
+    [ObservableProperty] private ObservableCollection<string> _rakOptions = [];
+    [ObservableProperty] private string _selectedModis;
+    [ObservableProperty] private string _selectedModisDescription;
+    [ObservableProperty] private string _selectedShelfFrom;
+    [ObservableProperty] private string _selectedShelfTo;
 
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -31,29 +31,64 @@ public partial class BarcodeWindowViewModel : ViewModelBase
         _databaseService = databaseService;
     }
 
+    public async Task InitializeAsync()
+    {
+        ModisOptions = new ObservableCollection<(string, string)>(await _databaseService.GetModisAsync());
+        SelectedModis = ModisOptions[0].Item1;
+        SelectedModisDescription = ModisOptions[0].Item2;
+        ModisShelfNames = new ObservableCollection<string>(ModisOptions.Select(option => option.Item1));
+
+
+        await GetModisShelfsAsync(SelectedModis);
+        SelectedShelfFrom = RakOptions[0];
+        SelectedShelfTo = RakOptions[0];
+    }
+
     [RelayCommand]
     private async Task GenerateBarcode()
     {
         BarcodeList.Clear();
-        var pluArray = PluList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        foreach (var plu in pluArray)
-        {
-            var details = await _databaseService.GetDescriptionAsync(plu);
-            var barcodes = await _databaseService.GetBarcodesAsync(plu);
+        var pluList = PluList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var barcode in barcodes)
+        foreach (var plu in pluList) await AddBarcodesToListAsync(plu);
+    }
+
+    [RelayCommand]
+    private async Task GenerateBarcodeFromModis()
+    {
+        BarcodeList.Clear();
+        var pluList = await _databaseService.GetShelfPluAsync(SelectedModis, SelectedShelfFrom, SelectedShelfTo);
+
+        foreach (var plu in pluList) await AddBarcodesToListAsync(plu);
+    }
+
+    private async Task AddBarcodesToListAsync(string plu)
+    {
+        var details = await _databaseService.GetProductDescriptionAsync(plu);
+        var barcodes = await _databaseService.GetBarcodesAsync(plu);
+
+        foreach (var barcode in barcodes)
+        {
+            var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
+            BarcodeList.Add(new Barcode
             {
-                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
-                BarcodeList.Add(new Barcode
-                {
-                    Plu = plu,
-                    Abbreviation = details.Abbreviation ?? "NO ABBREVIATION",
-                    Description = details.Description ?? "NO DESCRIPTION",
-                    BarcodeText = barcode,
-                    BarcodeImage = barcodeImage
-                });
-            }
+                Plu = plu,
+                Abbreviation = details.Abbreviation ?? "NO ABBREVIATION",
+                Description = details.Description ?? "NO DESCRIPTION",
+                BarcodeText = barcode,
+                BarcodeImage = barcodeImage
+            });
         }
+    }
+
+    public async Task GetModisShelfsAsync(string selectedItem)
+    {
+        var shelfNumbers = await _databaseService.GetShelfNumbersAsync(selectedItem);
+        RakOptions = new ObservableCollection<string>(shelfNumbers);
+
+        // Update SelectedModisDescription when SelectedModis changes
+        var selectedModisDetails = ModisOptions.FirstOrDefault(modis => modis.Item1 == selectedItem);
+        SelectedModisDescription = selectedModisDetails.Item2;
     }
 }
 

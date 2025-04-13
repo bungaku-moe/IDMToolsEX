@@ -1,6 +1,9 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using ZXing;
 using ZXing.Common;
 
@@ -26,29 +29,27 @@ public static class BarcodeGenerator
             var pixelData = writer.Write(text);
 
             using var stream = new MemoryStream();
-            var bitmap = new Avalonia.Media.Imaging.WriteableBitmap(
-                new Avalonia.PixelSize(pixelData.Width, pixelData.Height),
-                new Avalonia.Vector(96, 96),
-                Avalonia.Platform.PixelFormat.Bgra8888,
-                Avalonia.Platform.AlphaFormat.Premul);
+            var bitmap = new WriteableBitmap(
+                new PixelSize(pixelData.Width, pixelData.Height),
+                new Vector(96, 96),
+                PixelFormat.Bgra8888,
+                AlphaFormat.Premul);
 
             using var lockedBuffer = bitmap.Lock();
             unsafe
             {
                 var buffer = (uint*)lockedBuffer.Address;
-                for (int y = 0; y < pixelData.Height; y++)
+                for (var y = 0; y < pixelData.Height; y++)
+                for (var x = 0; x < pixelData.Width; x++)
                 {
-                    for (int x = 0; x < pixelData.Width; x++)
-                    {
-                        var offset = (y * pixelData.Width + x) * 4;
-                        var color = Avalonia.Media.Color.FromArgb(
-                            pixelData.Pixels[offset + 3],
-                            pixelData.Pixels[offset + 2],
-                            pixelData.Pixels[offset + 1],
-                            pixelData.Pixels[offset]);
+                    var offset = (y * pixelData.Width + x) * 4;
+                    var color = Color.FromArgb(
+                        pixelData.Pixels[offset + 3],
+                        pixelData.Pixels[offset + 2],
+                        pixelData.Pixels[offset + 1],
+                        pixelData.Pixels[offset]);
 
-                        buffer[(y * lockedBuffer.RowBytes / 4) + x] = color.ToUInt32();
-                    }
+                    buffer[y * lockedBuffer.RowBytes / 4 + x] = color.ToUInt32();
                 }
             }
 

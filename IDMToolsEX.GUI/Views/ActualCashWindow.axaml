@@ -44,7 +44,7 @@
                     <TextBlock Text="Total Setoran Sales:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
-                        Value="{Binding SalesDeposit}"
+                        Value="{Binding SalesDeposit, Mode=TwoWay}"
                         FormatString="C0" />
                 </StackPanel>
 
@@ -52,7 +52,7 @@
                     <TextBlock Text="Total Uang Fisik:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
-                        Value="{Binding ActualCash}"
+                        Value="{Binding ActualCash, Mode=TwoWay}"
                         FormatString="C0" />
                 </StackPanel>
 

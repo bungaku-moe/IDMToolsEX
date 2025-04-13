@@ -48,6 +48,9 @@ public class App : Application
             };
 
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            // Show Main Window on startup
+            _appViewModel.ShowWindow();
         }
 
         base.OnFrameworkInitializationCompleted();

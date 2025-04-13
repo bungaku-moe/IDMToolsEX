@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
+using IDMToolsEX.Models;
 using IDMToolsEX.Utility;
 
 namespace IDMToolsEX.ViewModels;
@@ -12,20 +13,24 @@ namespace IDMToolsEX.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly SystemSecurity _systemSecurity;
-
-    [ObservableProperty] private string _database = "pos";
     [ObservableProperty] private string _databaseConnectText = "Hubungkan";
     private DatabaseService? _databaseService;
-    [ObservableProperty] private string _host = "10.52.111.2";
     [ObservableProperty] private bool _isConnected;
-    [ObservableProperty] private string _password = "Nl/shZKyKgEJDNvT2DNdfJRswrXwm+yeU=WMxuByCted";
-    [ObservableProperty] private string _port = "3306";
+
+    [ObservableProperty] private Settings _settings;
     [ObservableProperty] private string _toggleRestrictionsText = "Matikan Pembatasan Sistem";
-    [ObservableProperty] private string _username = "kasir";
 
     public MainWindowViewModel()
     {
         _systemSecurity = new SystemSecurity();
+        var settingsLoader = new SettingsLoader();
+        Settings = settingsLoader.LoadSettings();
+        InitializeDatabaseConnectionAsync();
+    }
+
+    private async void InitializeDatabaseConnectionAsync()
+    {
+        await ToggleDatabaseConnection();
     }
 
     [RelayCommand]
@@ -52,16 +57,22 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             AppendLog(IsConnected ? "Memutuskan koneksi ke database..." : "Menghubungkan koneksi ke database...");
 
-            _databaseService ??= new DatabaseService(Database, Host, Port, Username, Password);
-            IsConnected = await _databaseService.ToggleConnectionAsync();
+            _databaseService ??= new DatabaseService(Settings.DatabaseCredentials.Database,
+                Settings.DatabaseCredentials.Server, Settings.DatabaseCredentials.Port.ToString(),
+                Settings.DatabaseCredentials.Username, Settings.DatabaseCredentials.Password);
 
-            AppendLog(IsConnected ? "Terkoneksi ke database." : "Terputus dari database.");
-
-            if (!IsConnected)
+            if (IsConnected)
             {
+                await _databaseService.DisconnectAsync();
                 _databaseService.Dispose();
                 _databaseService = null;
             }
+            else
+            {
+                IsConnected = await _databaseService.ConnectAsync();
+            }
+
+            AppendLog(IsConnected ? "Terkoneksi ke database." : "Terputus dari database.");
         }
         catch (Exception e)
         {
@@ -70,19 +81,6 @@ public partial class MainWindowViewModel : ViewModelBase
         finally
         {
             DatabaseConnectText = IsConnected ? "Putuskan" : "Hubungkan";
-        }
-    }
-
-    [RelayCommand]
-    private async void TestDb()
-    {
-        try
-        {
-            // AppendLog(await _databaseService.TestAsync());
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
         }
     }
 
@@ -101,32 +99,6 @@ public partial class MainWindowViewModel : ViewModelBase
                 break;
         }
     }
-
-    // [RelayCommand]
-    // private void OpenActualCashWindow()
-    // {
-    //     if (_databaseService == null)
-    //     {
-    //         AppendLog("Error! Database belum dihubungkan. Silahkan hubungkan terlebih dahulu.");
-    //         return;
-    //     }
-    //
-    //     var window = new ActualCashWindow(this, _databaseService);
-    //     window.Show();
-    // }
-    //
-    // [RelayCommand]
-    // private void OpenBarcodeWindow()
-    // {
-    //     if (_databaseService == null)
-    //     {
-    //         AppendLog("Error! Database belum dihubungkan. Silahkan hubungkan terlebih dahulu.");
-    //         return;
-    //     }
-    //
-    //     var window = new BarcodeWindow(this, _databaseService);
-    //     window.Show();
-    // }
 
     [RelayCommand]
     private void OpenWindow(string className)
