@@ -6,9 +6,9 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.BarcodeWindow"
         x:DataType="vm:BarcodeWindowViewModel"
-        MinWidth="1200" MinHeight="600"
+        MinWidth="800" MinHeight="500"
         Icon="/Assets/app-icon.ico"
-        Title="IDMToolsEX - Barcode Generator"
+        Title="IDMToolsEX - Cek Barcode"
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
     <Grid RowDefinitions="1*, 2*">
@@ -47,7 +47,8 @@
                             <Grid Grid.Row="0" ColumnDefinitions="2*, 2*, Auto" VerticalAlignment="Center">
                                 <!-- Modis -->
                                 <!-- Column 0: Modis ComboBox and Description -->
-                                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="5" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="5"
+                                            VerticalAlignment="Center">
                                     <!-- Modis ComboBox Row -->
                                     <StackPanel Orientation="Horizontal" Spacing="5">
                                         <TextBlock VerticalAlignment="Center">Modis:</TextBlock>
@@ -68,7 +69,7 @@
                                 <!-- Rak From and To -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
                                             Spacing="5">
-                                    <TextBlock VerticalAlignment="Center">Rak:</TextBlock>
+                                    <TextBlock VerticalAlignment="Center">Shelf:</TextBlock>
                                     <ComboBox ItemsSource="{Binding RakOptions}"
                                               SelectedItem="{Binding SelectedShelfFrom}"
                                               Width="80" />
@@ -90,7 +91,11 @@
 
                             <!-- Row 1: Future content -->
                             <Grid Grid.Row="1">
-                                <!-- Your other controls here -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="5">
+                                    <CheckBox Content="1 Barcode per Item"
+                                              IsChecked="{Binding IsOneBarcode}"
+                                              VerticalAlignment="Center" />
+                                </StackPanel>
                             </Grid>
                         </Grid>
                     </HeaderedContentControl>
@@ -101,6 +106,7 @@
             <DataGrid ItemsSource="{Binding BarcodeList}" AutoGenerateColumns="False" IsReadOnly="True"
                       CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True">
                 <DataGrid.Columns>
+                    <DataGridTextColumn Header="NO." Binding="{Binding Index}" Width="0.5*" />
                     <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.5*" />
                     <DataGridTextColumn Header="SINGKATAN" Binding="{Binding Abbreviation}" Width="1.1*" />
                     <DataGridTextColumn Header="DESKRIPSI" Binding="{Binding Description}" Width="1.8*" />

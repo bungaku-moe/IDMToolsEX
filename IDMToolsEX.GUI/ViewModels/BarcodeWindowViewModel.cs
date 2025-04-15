@@ -25,6 +25,10 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [ObservableProperty] private string _selectedShelfFrom;
     [ObservableProperty] private string _selectedShelfTo;
 
+    [ObservableProperty] private bool _isOneBarcode = true;
+    private int _index;
+    private string _lastPlu = string.Empty;
+
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         _mainWindowViewModel = mainWindowViewModel;
@@ -47,6 +51,7 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateBarcode()
     {
+        _index = 0;
         BarcodeList.Clear();
         var pluList = PluList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
@@ -56,6 +61,7 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateBarcodeFromModis()
     {
+        _index = 0;
         BarcodeList.Clear();
         var pluList = await _databaseService.GetShelfPluAsync(SelectedModis, SelectedShelfFrom, SelectedShelfTo);
 
@@ -66,20 +72,47 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     {
         var details = await _databaseService.GetProductDescriptionAsync(plu);
         var barcodes = await _databaseService.GetBarcodesAsync(plu);
+        var enumerable = barcodes as string[] ?? barcodes.ToArray();
 
-        foreach (var barcode in barcodes)
+        // Check if this is a new PLU
+        if (_lastPlu != plu)
         {
+            _index++;
+            _lastPlu = plu;
+        }
+
+        if (IsOneBarcode && enumerable.Length != 0)
+        {
+            var barcode = enumerable.First();
             var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
             BarcodeList.Add(new Barcode
             {
+                Index = _index,
                 Plu = plu,
-                Abbreviation = details.Abbreviation ?? "NO ABBREVIATION",
-                Description = details.Description ?? "NO DESCRIPTION",
+                Abbreviation = details.Abbreviation ?? "TIDAK ADA SINGKATAN",
+                Description = details.Description ?? "TIDAK ADA DESKRIPSI",
                 BarcodeText = barcode,
                 BarcodeImage = barcodeImage
             });
         }
+        else
+        {
+            foreach (var barcode in enumerable)
+            {
+                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
+                BarcodeList.Add(new Barcode
+                {
+                    Index = _index,
+                    Plu = plu,
+                    Abbreviation = details.Abbreviation ?? "TIDAK ADA SINGKATAN",
+                    Description = details.Description ?? "TIDAK ADA DESKRIPSI",
+                    BarcodeText = barcode,
+                    BarcodeImage = barcodeImage
+                });
+            }
+        }
     }
+
 
     public async Task GetModisShelfsAsync(string selectedItem)
     {
@@ -94,6 +127,7 @@ public partial class BarcodeWindowViewModel : ViewModelBase
 
 public partial class Barcode : ObservableObject
 {
+    [ObservableProperty] private int _index;
     [ObservableProperty] private string _abbreviation = string.Empty;
     [ObservableProperty] private Bitmap? _barcodeImage;
     [ObservableProperty] private string _barcodeText = string.Empty;

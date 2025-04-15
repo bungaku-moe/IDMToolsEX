@@ -78,11 +78,12 @@
             <WrapPanel>
                 <Button Content="Aktual Kas" Classes="tool-item" Command="{Binding OpenWindowCommand}"
                         CommandParameter="ActualCashWindow" />
-                <Button Content="Lihat Barcode" Classes="tool-item" Command="{Binding OpenWindowCommand}"
+                <Button Content="Cek Barcode" Classes="tool-item" Command="{Binding OpenWindowCommand}"
                         CommandParameter="BarcodeWindow" />
+                <Button Content="Cek Harga" Classes="tool-item" Command="{Binding OpenWindowCommand}"
+                        CommandParameter="PriceWindow" />
                 <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
                         Command="{Binding ToggleRestrictionsCommand}" />
-                <!-- <Button Content="Cek Harga" Classes="tool-item"></Button> -->
                 <!-- <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" /> -->
             </WrapPanel>
         </HeaderedContentControl>

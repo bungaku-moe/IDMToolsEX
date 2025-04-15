@@ -9,6 +9,7 @@
         <entry key="IDMToolsEX.GUI/Views/ActualCashWindow.axaml" value="IDMToolsEX.GUI/IDMToolsEX.GUI.csproj" />
         <entry key="IDMToolsEX.GUI/Views/BarcodeWindow.axaml" value="IDMToolsEX.GUI/IDMToolsEX.GUI.csproj" />
         <entry key="IDMToolsEX.GUI/Views/MainWindow.axaml" value="IDMToolsEX.GUI/IDMToolsEX.GUI.csproj" />
+        <entry key="IDMToolsEX.GUI/Views/PriceWindow.axaml" value="IDMToolsEX.GUI/IDMToolsEX.GUI.csproj" />
         <entry key="IDMToolsEX.GUI/Views/TestWindow.axaml" value="IDMToolsEX.GUI/IDMToolsEX.GUI.csproj" />
         <entry key="Views/MainWindow.axaml" value="IDMToolsEX.csproj" />
       </map>

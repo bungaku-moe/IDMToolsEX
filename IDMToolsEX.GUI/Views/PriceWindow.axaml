@@ -1,0 +1,56 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:IDMToolsEX.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="IDMToolsEX.Views.PriceWindow"
+        x:DataType="vm:PriceWindowViewModel"
+        x:Name="PriceWindowName"
+        Icon="/Assets/app-icon.ico"
+        Title="IDMToolsEX - Cek Harga"
+        MinWidth="400" MinHeight="300"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="WhiteSmoke">
+    <Grid RowDefinitions="0.5*, 2*" Margin="10">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <RadioButton GroupName="CariBerdasarkan" Content="Barcode" IsDefault="True" IsChecked="{Binding ByBarcode}"
+                         VerticalAlignment="Center" />
+            <RadioButton GroupName="CariBerdasarkan" Content="PLU" IsChecked="{Binding ByPlu}"
+                         VerticalAlignment="Center" />
+            <TextBox Text="{Binding SearchValue}" MinWidth="200" VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch" />
+            <Button Content="Cari" Command="{Binding GetItemPriceCommand}" Padding="10" VerticalAlignment="Center"
+                    MinWidth="60" />
+        </StackPanel>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding ItemPricesList}" AutoGenerateColumns="False"
+                  CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="DESKRIPSI" Binding="{Binding Description}" Width="1.6*" />
+                <DataGridTextColumn Header="KEMASAN" Binding="{Binding Packaging}" Width="0.35*" />
+                <DataGridTextColumn Header="HARGA" Binding="{Binding Price}" Width="1*" />
+                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.5*" />
+                <DataGridTextColumn Header="BARCODE" Binding="{Binding Barcode}" Width="0.8*" />
+                <DataGridTemplateColumn IsReadOnly="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <Button Content="Hapus Semua"
+                                    Command="{Binding ClearAllItemsCommand, ElementName=PriceWindowName}"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Hapus"
+                                    Command="{Binding DeleteItemCommand, ElementName=PriceWindowName}"
+                                    CommandParameter="{Binding}" HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch" VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

@@ -26,8 +26,6 @@
         </PackageReference>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1"/>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-        <PackageReference Include="FlaUI.Core" Version="5.0.0"/>
-        <PackageReference Include="FlaUI.UIA2" Version="5.0.0"/>
         <PackageReference Include="GlobalHotKeys.Windows" Version="0.1.0"/>
         <PackageReference Include="MySqlConnector" Version="2.4.0"/>
         <PackageReference Include="ZXing.Net" Version="0.16.10"/>

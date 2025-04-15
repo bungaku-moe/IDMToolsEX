@@ -67,7 +67,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
         var salesDepositDecimal = ParseDecimal(SalesDeposit);
         var actualCashDecimal = ParseDecimal(ActualCash);
 
-        ExpectedActualCash = TotalConsumentCash - (TotalChangeCash + salesDepositDecimal + TotalCashout + CashModal);
+        ExpectedActualCash = TotalConsumentCash - (TotalChangeCash + salesDepositDecimal + TotalCashout);
         Variance = actualCashDecimal - ExpectedActualCash;
     }
 

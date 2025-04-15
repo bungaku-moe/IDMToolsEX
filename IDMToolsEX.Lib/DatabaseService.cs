@@ -195,4 +195,58 @@ public class DatabaseService : IDisposable
         return await _connection.QueryAsync<string>(query,
             new { ShelfName = shelfName, ShelfNumberFrom = shelfNumberFrom, ShelfNumberTo = shelfNumberTo });
     }
+
+    public async Task<(decimal? Price, string? Description, string? Packaging, IEnumerable<string> Barcodes)>
+        GetItemDetailsByPluAsync(string plu)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT
+                                 p.PRICE,
+                                 p.DESC2 AS Description,
+                                 p.KEMASAN AS Packaging,
+                                 b.BARCD AS Barcode
+                             FROM prodmast p
+                             LEFT JOIN barcode b ON p.PRDCD = b.PLU
+                             WHERE p.PRDCD = @ProductCode;
+                             """;
+
+        var result =
+            await _connection.QueryAsync<(decimal?, string?, string?, string)>(query, new { ProductCode = plu });
+
+        if (!result.Any())
+            return (null, null, null, []);
+
+        (decimal? Price, string? Description, string? Packaging, IEnumerable<string> Barcodes)? groupedResult = result
+            .GroupBy(r => new { r.Item1, r.Item2, r.Item3 })
+            .Select(g => (
+                Price: g.Key.Item1,
+                Description: g.Key.Item2,
+                Packaging: g.Key.Item3,
+                Barcodes: g.Select(r => r.Item4)
+            ))
+            .FirstOrDefault();
+
+        return groupedResult ?? (null, null, null, []);
+    }
+
+    public async Task<(decimal? Price, string? Plu, string? Description, string? Packaging)>
+        GetItemPriceByBarcodeAsync(string barcode)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                                 SELECT
+                                     p.PRICE,
+                                     p.PRDCD AS Plu,
+                                     p.DESC2 AS Description,
+                                     p.KEMASAN AS Packaging
+                                 FROM barcode b
+                                 INNER JOIN prodmast p ON b.PLU = p.PRDCD
+                                 WHERE b.BARCD = @Barcode;
+                             """;
+        return await _connection.QuerySingleOrDefaultAsync<(decimal?, string?, string?, string?)>(query,
+            new { Barcode = barcode });
+    }
 }
