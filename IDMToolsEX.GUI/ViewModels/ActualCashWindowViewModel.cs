@@ -13,14 +13,15 @@ public partial class ActualCashWindowViewModel : ViewModelBase
     private readonly DatabaseService _databaseService;
     private readonly CultureInfo _idrCulture = new("id-ID");
     private readonly MainWindowViewModel _mainWindowViewModel;
-    [ObservableProperty] private string? _actualCash = "0";
-    [ObservableProperty] private decimal? _cashModal = 100000;
+    [ObservableProperty] private ObservableCollection<CashSummaryRow> _cashSummary = [];
 
     [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
     [ObservableProperty] private decimal? _expectedActualCash = 0;
+    [ObservableProperty] private decimal? _modalMoney = 100000;
+    [ObservableProperty] private string? _physicalMoney = "0";
     [ObservableProperty] private string? _salesDeposit = "0";
-    [ObservableProperty] private int _shift = 1;
-    [ObservableProperty] private int _station = 1;
+    [ObservableProperty] private int? _shift = 1;
+    [ObservableProperty] private int? _station = 1;
     [ObservableProperty] private decimal? _totalCashout;
     [ObservableProperty] private decimal? _totalChangeCash = 0;
     [ObservableProperty] private decimal? _totalConsumentCash = 0;
@@ -30,19 +31,26 @@ public partial class ActualCashWindowViewModel : ViewModelBase
     {
         _databaseService = databaseService;
         _mainWindowViewModel = mainWindowViewModel;
-
-        CashSummaryRows.Add(new CashSummaryRow
-            { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(TotalConsumentCash) });
-        CashSummaryRows.Add(new CashSummaryRow
-            { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(TotalChangeCash) });
-        CashSummaryRows.Add(new CashSummaryRow
-            { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(TotalCashout) });
-        CashSummaryRows.Add(new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(CashModal) });
-        CashSummaryRows.Add(new CashSummaryRow { Name = "Aktual Kas", Value = FormatCurrency(ExpectedActualCash) });
-        CashSummaryRows.Add(new CashSummaryRow { Name = "Variance", Value = FormatCurrency(Variance) });
     }
 
-    public ObservableCollection<CashSummaryRow> CashSummaryRows { get; set; } = [];
+    public void Initialize()
+    {
+        CashSummary =
+        [
+            new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(0) },
+            new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(0) },
+            new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(0) },
+            new CashSummaryRow
+                { Name = "(i) Total BA Virtual (Cashout, Struk)", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" },
+            new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(ModalMoney) },
+            new CashSummaryRow
+            {
+                Name = "Aktual Kas, BA Virtual Cashout",
+                Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}"
+            },
+            new CashSummaryRow { Name = "Variance", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" }
+        ];
+    }
 
     [RelayCommand]
     private async Task GetSalesInfo()
@@ -54,57 +62,47 @@ public partial class ActualCashWindowViewModel : ViewModelBase
             return;
         }
 
-        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift, Station);
+        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift ?? 1, Station ?? 1);
         TotalConsumentCash = result.totalConsumentCash;
         TotalChangeCash = result.totalChangeCash;
         ExpectedActualCash = result.totalActualCash;
-        TotalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift, Station);
+        TotalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift ?? 1, Station ?? 1);
     }
 
     [RelayCommand]
-    private void CalculateActualCash()
+    private async Task CalculateActualCash()
     {
-        var salesDepositDecimal = ParseDecimal(SalesDeposit);
-        var actualCashDecimal = ParseDecimal(ActualCash);
+        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift ?? 1, Station ?? 1);
+        var totalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift ?? 1, Station ?? 1);
+        var beritaAcaraVirtual = await _databaseService.GetTotalBeritaAcaraVirtualAsync(Date, Shift ?? 1, Station ?? 1);
+        var salesDeposit = ParseDecimal(SalesDeposit);
+        var physicalMoney = ParseDecimal(PhysicalMoney);
+        var actualCash = result.totalActualCash - (totalCashout + salesDeposit + beritaAcaraVirtual.Struk);
 
-        ExpectedActualCash = TotalConsumentCash - (TotalChangeCash + salesDepositDecimal + TotalCashout);
-        Variance = actualCashDecimal - ExpectedActualCash;
-    }
-
-    partial void OnTotalConsumentCashChanged(decimal? value)
-    {
-        CashSummaryRows[0].Value = FormatCurrency(value);
-        CashSummaryRows[0].NotifyValueChanged();
-    }
-
-    partial void OnTotalChangeCashChanged(decimal? value)
-    {
-        CashSummaryRows[1].Value = FormatCurrency(value);
-        CashSummaryRows[1].NotifyValueChanged();
-    }
-
-    partial void OnTotalCashoutChanged(decimal? value)
-    {
-        CashSummaryRows[2].Value = FormatCurrency(value);
-        CashSummaryRows[2].NotifyValueChanged();
-    }
-
-    partial void OnCashModalChanged(decimal? value)
-    {
-        CashSummaryRows[3].Value = FormatCurrency(value);
-        CashSummaryRows[3].NotifyValueChanged();
-    }
-
-    partial void OnExpectedActualCashChanged(decimal? value)
-    {
-        CashSummaryRows[4].Value = FormatCurrency(value);
-        CashSummaryRows[4].NotifyValueChanged();
-    }
-
-    partial void OnVarianceChanged(decimal? value)
-    {
-        CashSummaryRows[5].Value = FormatCurrency(value);
-        CashSummaryRows[5].NotifyValueChanged();
+        CashSummary.Clear();
+        CashSummary =
+        [
+            new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(result.totalConsumentCash) },
+            new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(result.totalChangeCash) },
+            new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(totalCashout) },
+            new CashSummaryRow
+            {
+                Name = "(i) Total BA Virtual (Cashout, Struk)",
+                Value = $"{FormatCurrency(beritaAcaraVirtual.Cashout)}, {FormatCurrency(beritaAcaraVirtual.Struk)}"
+            },
+            new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(ModalMoney) },
+            new CashSummaryRow
+            {
+                Name = "Aktual Kas, + BA Virtual Cashout",
+                Value = $"{FormatCurrency(actualCash)}, {FormatCurrency(actualCash - beritaAcaraVirtual.Cashout)}"
+            },
+            new CashSummaryRow
+            {
+                Name = "Variance",
+                Value =
+                    $"{FormatCurrency(physicalMoney - actualCash)}, {FormatCurrency(physicalMoney - (actualCash + beritaAcaraVirtual.Cashout))}"
+            }
+        ];
     }
 
     private decimal ParseDecimal(string? input)
@@ -116,7 +114,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
 
     private string FormatCurrency(decimal? value)
     {
-        return (value ?? 0).ToString("C0", _idrCulture); // IDR format, no decimal places
+        return (value ?? 0).ToString("C0", _idrCulture);
     }
 }
 
@@ -124,9 +122,4 @@ public partial class CashSummaryRow : ObservableObject
 {
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string? _value;
-
-    public void NotifyValueChanged()
-    {
-        OnPropertyChanged(nameof(Value));
-    }
 }

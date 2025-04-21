@@ -18,6 +18,8 @@ public class DatabaseService : IDisposable
 
     public bool IsConnected { get; private set; }
 
+    #region Connection
+
     public void Dispose()
     {
         _connection?.Dispose();
@@ -41,10 +43,7 @@ public class DatabaseService : IDisposable
             Debug.WriteLine("MySQL OpenAsync failed.");
             Debug.WriteLine("Exception: " + ex.Message);
             Debug.WriteLine("StackTrace: " + ex.StackTrace);
-            if (ex.InnerException != null)
-            {
-                Debug.WriteLine("InnerException: " + ex.InnerException.Message);
-            }
+            if (ex.InnerException != null) Debug.WriteLine("InnerException: " + ex.InnerException.Message);
 
             throw; // Rethrow so you can see it in ConnectAsync too if needed
         }
@@ -78,6 +77,10 @@ public class DatabaseService : IDisposable
 
         IsConnected = false;
     }
+
+    #endregion
+
+    #region Actual Cash
 
     public async Task<(decimal totalConsumentCash, decimal totalChangeCash, decimal totalActualCash)>
         GetExpectedActualCashAsync(
@@ -143,6 +146,36 @@ public class DatabaseService : IDisposable
         return result;
     }
 
+    public async Task<(decimal Cashout, decimal Struk)> GetTotalBeritaAcaraVirtualAsync(DateTimeOffset date, int shift,
+        int station)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT
+                                 IFNULL(SUM(NOMINAL_CASHOUT), 0) AS TotalCashout,
+                                 IFNULL(SUM(NOMINAL_STRUK), 0) AS TotalStruk
+                             FROM batv_virtual
+                             WHERE
+                                 BUKTI_TGL = @Tanggal AND
+                                 SHIFT = @Shift AND
+                                 STATION = @Station;
+                             """;
+
+        var result = await _connection.QuerySingleOrDefaultAsync<(decimal Cashout, decimal Struk)>(query, new
+        {
+            Tanggal = date.ToString("yyyy-MM-dd"),
+            Shift = shift,
+            Station = station.ToString("D2")
+        });
+
+        return result;
+    }
+
+    #endregion
+
+    #region Display Barang
+
     public async Task<IEnumerable<string>> GetBarcodesAsync(string plu)
     {
         await EnsureConnectedAsync();
@@ -195,6 +228,10 @@ public class DatabaseService : IDisposable
         return await _connection.QueryAsync<string>(query,
             new { ShelfName = shelfName, ShelfNumberFrom = shelfNumberFrom, ShelfNumberTo = shelfNumberTo });
     }
+
+    #endregion
+
+    #region Price Tag
 
     public async Task<(decimal? Price, string? Description, string? Packaging, IEnumerable<string> Barcodes)>
         GetItemDetailsByPluAsync(string plu)
@@ -249,4 +286,49 @@ public class DatabaseService : IDisposable
         return await _connection.QuerySingleOrDefaultAsync<(decimal?, string?, string?, string?)>(query,
             new { Barcode = barcode });
     }
+
+    public async Task<(decimal? Price, decimal? Promo, DateTimeOffset? Start, DateTimeOffset? End)?>
+        GetPromotionByPluAsync(string plu)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT PRICE, PRO_RUPIAH, MULAI, AKHIR
+                             FROM ptag_promo_marketing
+                             WHERE PRDCD = @Plu
+                             LIMIT 1;
+                             """;
+
+        return await _connection.QuerySingleOrDefaultAsync<(decimal?, decimal?, DateTimeOffset?, DateTimeOffset?)>(
+            query, new
+            {
+                Plu = plu
+            });
+    }
+
+    public async Task<(decimal? Price, decimal? Promo, DateTimeOffset? Start, DateTimeOffset? End)?>
+        GetPromotionByBarcodeAsync(
+            string barcode)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT PLU
+                             FROM barcode
+                             WHERE BARCD = @Barcode
+                             LIMIT 1;
+                             """;
+
+        var plu = await _connection.QuerySingleOrDefaultAsync<string>(query, new
+        {
+            Barcode = barcode
+        });
+
+        if (string.IsNullOrEmpty(plu))
+            return null;
+
+        return await GetPromotionByPluAsync(plu);
+    }
+
+    #endregion
 }

@@ -7,13 +7,13 @@ namespace IDMToolsEX.Views;
 
 public partial class PriceWindow : Window
 {
-    public PriceWindowViewModel ViewModel => (PriceWindowViewModel)DataContext;
-
     public PriceWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         DataContext = new PriceWindowViewModel(mainWindowViewModel, databaseService);
         InitializeComponent();
     }
+
+    public PriceWindowViewModel ViewModel => (PriceWindowViewModel)DataContext;
 
     [RelayCommand]
     private void ClearAllItems()

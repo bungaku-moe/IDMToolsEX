@@ -18,7 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isConnected;
 
     [ObservableProperty] private Settings _settings;
-    [ObservableProperty] private string _toggleRestrictionsText = "Matikan Pembatasan Sistem";
+    [ObservableProperty] private string _toggleRestrictionsText = "Matikan Batasan Sistem";
 
     public MainWindowViewModel()
     {
@@ -90,11 +90,11 @@ public partial class MainWindowViewModel : ViewModelBase
         switch (_systemSecurity.ArePoliciesEnabled())
         {
             case true:
-                ToggleRestrictionsText = "Matikan Pembatasan Sistem";
+                ToggleRestrictionsText = "Matikan Batasan Sistem";
                 _systemSecurity.DisablePolicies();
                 break;
             case false:
-                ToggleRestrictionsText = "Pulihkan Pembatasan Sistem";
+                ToggleRestrictionsText = "Pulihkan Batasan Sistem";
                 _systemSecurity.EnablePolicies();
                 break;
         }

@@ -6,9 +6,9 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.ActualCashWindow"
         x:DataType="vm:ActualCashWindowViewModel"
-        MaxWidth="465" MaxHeight="660" MinWidth="465" MinHeight="660"
+        MaxWidth="480" MinWidth="480" MinHeight="680"
         Icon="/Assets/app-icon.ico"
-        Title="IDMToolsEX - Actual Cash"
+        Title="IDMToolsEX - Aktual Kas"
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 
@@ -16,31 +16,28 @@
     <!--     <vm:ActualCashWindowViewModel /> -->
     <!-- </Window.DataContext> -->
 
-    <StackPanel Margin="20" Spacing="10">
+    <StackPanel Margin="20 5" Spacing="15">
         <HeaderedContentControl Header="Initial">
-            <StackPanel>
-                <StackPanel HorizontalAlignment="Stretch">
+            <StackPanel Spacing="8">
+                <StackPanel HorizontalAlignment="Stretch" Spacing="3">
                     <TextBlock Text="Tanggal:" />
                     <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
                 </StackPanel>
 
-                <StackPanel>
+                <StackPanel Spacing="3">
                     <TextBlock Text="Shift:" />
-                    <NumericUpDown Minimum="1" Maximum="3" FormatString="0" Value="{Binding Shift}" />
+                    <NumericUpDown Minimum="1" Maximum="3" FormatString="0" Value="{Binding Shift, Mode=TwoWay}" />
                 </StackPanel>
 
-                <StackPanel>
+                <StackPanel Spacing="3">
                     <TextBlock Text="Station:" />
-                    <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station}" />
+                    <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station, Mode=TwoWay}" />
                 </StackPanel>
-
-                <Button Content="Ambil Info Sales"
-                        Command="{Binding GetSalesInfoCommand}" />
             </StackPanel>
         </HeaderedContentControl>
         <HeaderedContentControl Header="Kalkulasi">
-            <StackPanel>
-                <StackPanel>
+            <StackPanel Spacing="8">
+                <StackPanel Spacing="3">
                     <TextBlock Text="Total Setoran Sales:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
@@ -48,25 +45,27 @@
                         FormatString="C0" />
                 </StackPanel>
 
-                <StackPanel>
+                <StackPanel Spacing="3">
                     <TextBlock Text="Total Uang Fisik:" />
                     <NumericUpDown
                         ShowButtonSpinner="False"
-                        Value="{Binding ActualCash, Mode=TwoWay}"
+                        Value="{Binding PhysicalMoney, Mode=TwoWay}"
                         FormatString="C0" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Spacing="20">
+                <StackPanel Orientation="Horizontal">
                     <Button Content="Hitung Aktual Kas"
-                            Command="{Binding CalculateActualCashCommand}" />
+                            Command="{Binding CalculateActualCashCommand}" HorizontalContentAlignment="Center"
+                            FontWeight="Medium" />
                 </StackPanel>
             </StackPanel>
         </HeaderedContentControl>
-        <DataGrid ItemsSource="{Binding CashSummaryRows}" AutoGenerateColumns="False" GridLinesVisibility="All"
-                  CanUserResizeColumns="True" CanUserSortColumns="True" HeadersVisibility="Column" Margin="10"
+        <DataGrid ItemsSource="{Binding CashSummary}" AutoGenerateColumns="False" GridLinesVisibility="All"
+                  CanUserResizeColumns="True" CanUserSortColumns="True" CanUserReorderColumns="True"
+                  HeadersVisibility="Column"
                   IsReadOnly="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Nama" Binding="{Binding Name}" Width="*" />
                 <DataGridTextColumn Header="Nilai" Binding="{Binding Value}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>

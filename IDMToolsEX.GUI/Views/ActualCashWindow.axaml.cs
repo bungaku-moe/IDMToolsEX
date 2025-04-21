@@ -9,6 +9,11 @@ public partial class ActualCashWindow : Window
     public ActualCashWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         DataContext = new ActualCashWindowViewModel(mainWindowViewModel, databaseService);
-        InitializeComponent();
+        Loaded += (_, _) =>
+        {
+            if (DataContext is not ActualCashWindowViewModel viewModel) return;
+            viewModel.Initialize();
+            InitializeComponent();
+        };
     }
 }

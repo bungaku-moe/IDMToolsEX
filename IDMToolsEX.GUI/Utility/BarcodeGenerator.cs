@@ -26,6 +26,9 @@ public static class BarcodeGenerator
                 }
             };
 
+            if (string.IsNullOrEmpty(text))
+                return null;
+
             var pixelData = writer.Write(text);
 
             using var stream = new MemoryStream();

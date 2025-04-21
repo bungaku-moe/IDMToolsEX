@@ -80,10 +80,8 @@
                         CommandParameter="ActualCashWindow" />
                 <Button Content="Cek Barcode" Classes="tool-item" Command="{Binding OpenWindowCommand}"
                         CommandParameter="BarcodeWindow" />
-                <Button Content="Cek Harga" Classes="tool-item" Command="{Binding OpenWindowCommand}"
+                <Button Content="Price Tag" Classes="tool-item" Command="{Binding OpenWindowCommand}"
                         CommandParameter="PriceWindow" />
-                <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
-                        Command="{Binding ToggleRestrictionsCommand}" />
                 <!-- <Button Content="Test Db Connection" Classes="tool-item" Command="{Binding TestDbCommand}" /> -->
             </WrapPanel>
         </HeaderedContentControl>
@@ -91,6 +89,8 @@
         <HeaderedContentControl Header="Alat-Alat Windows" Grid.Row="1" Grid.Column="1" Classes="group-container">
             <ScrollViewer>
                 <WrapPanel Orientation="Horizontal">
+                    <Button Content="{Binding ToggleRestrictionsText}" Classes="tool-item"
+                            Command="{Binding ToggleRestrictionsCommand}" />
                     <Button Classes="tool-item" Content="Calculator" Command="{Binding OpenAppCommand}"
                             CommandParameter="calc" />
                     <Button Classes="tool-item" Content="Notepad" Command="{Binding OpenAppCommand}"

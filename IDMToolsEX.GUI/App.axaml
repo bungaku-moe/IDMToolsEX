@@ -11,19 +11,19 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
-    <TrayIcon.Icons>
-        <TrayIcons>
-            <TrayIcon Icon="/Assets/app-icon.ico" ToolTipText="IDMToolsEX">
-                <TrayIcon.Menu>
-                    <NativeMenu>
-                        <NativeMenuItem Header="Open" Command="{Binding ShowWindowCommand}" />
-                        <NativeMenuItemSeparator />
-                        <NativeMenuItem Header="Exit" Command="{Binding ExitCommand}" />
-                    </NativeMenu>
-                </TrayIcon.Menu>
-            </TrayIcon>
-        </TrayIcons>
-    </TrayIcon.Icons>
+    <!-- <TrayIcon.Icons> -->
+    <!--     <TrayIcons> -->
+    <!--         <TrayIcon Icon="/Assets/app-icon.ico" ToolTipText="IDMToolsEX"> -->
+    <!--             <TrayIcon.Menu> -->
+    <!--                 <NativeMenu> -->
+    <!--                     <NativeMenuItem Header="Open" Command="{Binding ShowWindowCommand}" /> -->
+    <!--                     <NativeMenuItemSeparator /> -->
+    <!--                     <NativeMenuItem Header="Exit" Command="{Binding ExitCommand}" /> -->
+    <!--                 </NativeMenu> -->
+    <!--             </TrayIcon.Menu> -->
+    <!--         </TrayIcon> -->
+    <!--     </TrayIcons> -->
+    <!-- </TrayIcon.Icons> -->
 
     <Application.Styles>
         <FluentTheme />
