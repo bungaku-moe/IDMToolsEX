@@ -1,13 +1,8 @@
-using System;
 using System.Globalization;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
-using GlobalHotKeys.Native.Types;
 using IDMToolsEX.ViewModels;
-using HotKeyManager = GlobalHotKeys.HotKeyManager;
 
 namespace IDMToolsEX;
 

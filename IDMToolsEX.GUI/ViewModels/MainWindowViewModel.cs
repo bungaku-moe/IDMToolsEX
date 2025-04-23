@@ -17,14 +17,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private DatabaseService? _databaseService;
     [ObservableProperty] private bool _isConnected;
 
+    [ObservableProperty] private SettingsLoader _settingsLoader;
     [ObservableProperty] private Settings _settings;
     [ObservableProperty] private string _toggleRestrictionsText = "Matikan Batasan Sistem";
 
     public MainWindowViewModel()
     {
         _systemSecurity = new SystemSecurity();
-        var settingsLoader = new SettingsLoader();
-        Settings = settingsLoader.LoadSettings();
+        SettingsLoader = new SettingsLoader();
+        Settings = SettingsLoader.LoadSettings();
         InitializeDatabaseConnectionAsync();
     }
 

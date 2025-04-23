@@ -10,6 +10,8 @@ public class DatabaseService : IDisposable
     private readonly string _connectionString;
     private MySqlConnection? _connection;
 
+    #region Connection
+
     public DatabaseService(string database, string host, string port, string username, string password)
     {
         _connectionString =
@@ -18,7 +20,6 @@ public class DatabaseService : IDisposable
 
     public bool IsConnected { get; private set; }
 
-    #region Connection
 
     public void Dispose()
     {
@@ -196,7 +197,7 @@ public class DatabaseService : IDisposable
     {
         await EnsureConnectedAsync();
 
-        const string query = "SELECT DISTINCT NAMA_RAK, KET_RAK FROM _rak_temp ORDER BY NAMA_RAK;";
+        const string query = "SELECT DISTINCT NAMA_RAK, KET_RAK FROM rak ORDER BY NAMA_RAK;";
         return await _connection.QueryAsync<(string, string)>(query);
     }
 
@@ -206,7 +207,7 @@ public class DatabaseService : IDisposable
 
         const string query = """
                              SELECT DISTINCT NOSHELF
-                             FROM _rak_temp
+                             FROM rak
                              WHERE NAMA_RAK = @ShelfName
                              ORDER BY NOSHELF ASC;
                              """;
@@ -221,7 +222,7 @@ public class DatabaseService : IDisposable
 
         const string query = """
                              SELECT PLUMD
-                             FROM _rak_temp
+                             FROM rak
                              WHERE NAMA_RAK = @ShelfName AND NOSHELF BETWEEN @ShelfNumberFrom AND @ShelfNumberTo;
                              """;
 
@@ -328,6 +329,63 @@ public class DatabaseService : IDisposable
             return null;
 
         return await GetPromotionByPluAsync(plu);
+    }
+
+    #endregion
+
+    #region Sales Report
+
+    // public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
+    //     string plu, DateTimeOffset date, int shift)
+    // {
+    //     await EnsureConnectedAsync();
+    //
+    //     const string query = """
+    //                              SELECT QTY, PRICE, JAM, RTYPE
+    //                              FROM mtran
+    //                              WHERE PLU = @Plu
+    //                              AND DATE(TANGGAL) = DATE(@Tanggal)
+    //                              AND SHIFT = @Shift;
+    //                          """;
+    //
+    //     // Convert DateTimeOffset to UTC and extract date part
+    //     var utcDate = date.UtcDateTime.Date;
+    //
+    //     var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(
+    //         query,
+    //         new
+    //         {
+    //             Plu = plu,
+    //             Tanggal = utcDate, // Pass as DateTime
+    //             Shift = shift
+    //         });
+    //
+    //     return result.ToList();
+    // }
+
+    public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
+        string plu, DateTimeOffset date, int shift)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                                 SELECT
+                                     CAST(QTY AS SIGNED) AS QTY,
+                                     CAST(PRICE AS DECIMAL(10, 2)) AS PRICE,
+                                     CAST(JAM AS CHAR) AS JAM,
+                                     CAST(RTYPE AS CHAR) AS RTYPE
+                                 FROM mtran
+                                 WHERE PLU = @Plu AND DATE(TANGGAL) = @Tanggal AND SHIFT = @Shift;
+                             """;
+
+        var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(query, new
+        {
+            Plu = plu,
+            Tanggal = date.ToString("yyyy-MM-dd"),
+            Shift = shift
+        });
+
+        return result.ToList();
     }
 
     #endregion
