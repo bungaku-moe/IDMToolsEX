@@ -98,6 +98,8 @@ public partial class PriceWindowViewModel : ViewModelBase
         {
             _mainWindowViewModel.AppendLog("Tidak ada hasil ditemukan.");
         }
+
+        SearchValue = string.Empty;
     }
 
     private string FormatCurrency(decimal? value)

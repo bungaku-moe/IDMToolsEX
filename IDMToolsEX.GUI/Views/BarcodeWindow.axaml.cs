@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using IDMToolsEX.Lib;
 using IDMToolsEX.ViewModels;
 
@@ -6,8 +7,11 @@ namespace IDMToolsEX.Views;
 
 public partial class BarcodeWindow : Window
 {
+    private MainWindowViewModel _mainWindowViewModel;
+
     public BarcodeWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
+        _mainWindowViewModel = mainWindowViewModel;
         DataContext = new BarcodeWindowViewModel(mainWindowViewModel, databaseService);
         Loaded += async (_, _) =>
         {
@@ -23,5 +27,10 @@ public partial class BarcodeWindow : Window
         var selectedItem = e.AddedItems[0]?.ToString();
         if (DataContext is not BarcodeWindowViewModel viewModel) return;
         await viewModel.GetModisShelfsAsync(selectedItem);
+    }
+
+    private void OnInvalidBarcodeChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        // _mainWindowViewModel.Settings.BadBarcodeList.Add(e.Sender.GetValue());
     }
 }

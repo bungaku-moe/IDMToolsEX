@@ -9,10 +9,14 @@ namespace IDMToolsEX.Views;
 
 public partial class SalesReportWindow : Window
 {
+    private MainWindowViewModel _mainWindowViewModel;
+    private SalesReportWindowViewModel ViewModel => (SalesReportWindowViewModel)DataContext;
+
     public SalesReportWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
-        InitializeComponent();
+        _mainWindowViewModel = mainWindowViewModel;
         DataContext = new SalesReportWindowViewModel(mainWindowViewModel, databaseService);
+        InitializeComponent();
         Loaded += async (_, _) =>
         {
             if (DataContext is not SalesReportWindowViewModel viewModel) return;
@@ -20,19 +24,14 @@ public partial class SalesReportWindow : Window
         };
     }
 
-    public SalesReportWindowViewModel ViewModel => (SalesReportWindowViewModel)DataContext;
-
     [RelayCommand]
     private void DeleteItem(GroupedSaleItem group)
     {
-        // foreach (var item in group.Items?.ToList())
-        // {
-            ViewModel.GroupedItemsList.Remove(group);
-        // }
-
-        // ViewModel.RegroupItems(); // re-apply grouping
+        ViewModel.GroupedItemsList.Remove(group);
+        _mainWindowViewModel.Settings.SalesReportPluList.Remove(group.Plu);
+        _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
+        ViewModel.AppendLog($"Plu {group.Plu} dihapus.");
     }
-
 
     [RelayCommand]
     private void ClearAllItems()

@@ -87,21 +87,22 @@
         <!-- Bottom Barcode Table -->
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding BarcodeList}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
+                  AutoGenerateColumns="False"
                   CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True" Margin="10">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="NO." Binding="{Binding Index}" Width="0.5*" />
-                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.5*" />
+                <DataGridTextColumn Header="NO." Binding="{Binding Index}" Width="65" />
+                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="85" />
                 <DataGridTextColumn Header="SINGKATAN" Binding="{Binding Abbreviation}" Width="1.1*" />
                 <DataGridTextColumn Header="DESKRIPSI" Binding="{Binding Description}" Width="1.8*" />
-                <DataGridTextColumn Header="BARCODE" Binding="{Binding BarcodeText}" Width="0.8*" />
-                <DataGridTemplateColumn Width="2*">
+                <DataGridTextColumn Header="BARCODE" Binding="{Binding BarcodeText}" Width="*" />
+                <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="{Binding BarcodeImage}" MinWidth="280" MinHeight="220" Margin="12" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridCheckBoxColumn Header="INVALID?" Binding="{Binding IsInvalid}" Width="40" PropertyChanged="OnInvalidBarcodeChanged" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

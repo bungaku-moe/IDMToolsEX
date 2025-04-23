@@ -33,7 +33,7 @@ public partial class SalesReportWindowViewModel : ViewModelBase
 
     public async Task Initialize()
     {
-        // await LoadItems();
+        await LoadItems();
     }
 
     [RelayCommand]

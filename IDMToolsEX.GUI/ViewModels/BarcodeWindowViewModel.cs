@@ -138,4 +138,5 @@ public partial class Barcode : ObservableObject
     [ObservableProperty] private string _description = string.Empty;
     [ObservableProperty] private int _index;
     [ObservableProperty] private string _plu = string.Empty;
+    [ObservableProperty] private bool _isInvalid;
 }
