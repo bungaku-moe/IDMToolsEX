@@ -44,43 +44,132 @@
                     VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                     FontWeight="Black"
                     Command="{Binding AddItemCommand}" />
+            <Button Content="Hapus Semua di Tab Sekarang" Height="35"
+                    VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                    FontWeight="Black"
+                    Command="{Binding ClearAllItemsCommand, ElementName=SalesReportWindowName}" />
         </StackPanel>
 
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4">
-            <ItemsControl ItemsSource="{Binding GroupedItemsList}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Expander Margin="0 4 0 0" HorizontalAlignment="Stretch">
-                            <Expander.Header>
-                                <DockPanel>
-                                    <TextBlock Text="{Binding Plu}" Width="80" />
-                                    <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
-                                    <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
-                                    <Button Content="Hapus"
-                                            Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
-                                            CommandParameter="{Binding}"
-                                            Margin="8,0,0,0"
-                                            Padding="6,4" HorizontalAlignment="Right" />
-                                </DockPanel>
-                            </Expander.Header>
+            <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+                <TabItem Header="Hemat" FontSize="20">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding HematItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander Margin="0 4 0 0" HorizontalAlignment="Stretch">
+                                        <Expander.Header>
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Plu}" Width="80" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <Button Content="Hapus"
+                                                        Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="8,0,0,0"
+                                                        Padding="6,4" HorizontalAlignment="Right" Width="80"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center" />
+                                            </DockPanel>
+                                        </Expander.Header>
 
-                            <DataGrid ItemsSource="{Binding Items}"
-                                      AutoGenerateColumns="False"
-                                      CanUserResizeColumns="True"
-                                      HeadersVisibility="Column"
-                                      Margin="0">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.2*" />
-                                    <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" />
-                                    <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="80" />
-                                    <DataGridTextColumn Header="Waktu" Binding="{Binding Time}" Width="120" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Expander>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                        <DataGrid ItemsSource="{Binding Items}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserResizeColumns="True"
+                                                  HeadersVisibility="Column"
+                                                  Margin="0" Padding="0">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.2*" />
+                                                <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" />
+                                                <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="80" />
+                                                <DataGridTextColumn Header="Waktu" Binding="{Binding Time}" Width="120" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Murah" FontSize="20">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding MurahItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander Margin="0 4 0 0" HorizontalAlignment="Stretch">
+                                        <Expander.Header>
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Plu}" Width="80" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <Button Content="Hapus"
+                                                        Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="8,0,0,0"
+                                                        Padding="6,4" HorizontalAlignment="Right" Width="80"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center" />
+                                            </DockPanel>
+                                        </Expander.Header>
+
+                                        <DataGrid ItemsSource="{Binding Items}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserResizeColumns="True"
+                                                  HeadersVisibility="Column"
+                                                  Margin="0" Padding="0">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.2*" />
+                                                <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" />
+                                                <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="80" />
+                                                <DataGridTextColumn Header="Waktu" Binding="{Binding Time}" Width="120" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Heboh" FontSize="20">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding HebohItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander Margin="0 4 0 0" HorizontalAlignment="Stretch">
+                                        <Expander.Header>
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Plu}" Width="80" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <Button Content="Hapus"
+                                                        Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="8,0,0,0"
+                                                        Padding="6,4" HorizontalAlignment="Right" Width="80"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center" />
+                                            </DockPanel>
+                                        </Expander.Header>
+
+                                        <DataGrid ItemsSource="{Binding Items}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserResizeColumns="True"
+                                                  HeadersVisibility="Column"
+                                                  Margin="0" Padding="0">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.2*" />
+                                                <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" />
+                                                <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="80" />
+                                                <DataGridTextColumn Header="Waktu" Binding="{Binding Time}" Width="120" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
         </Border>
-
     </Grid>
 </Window>

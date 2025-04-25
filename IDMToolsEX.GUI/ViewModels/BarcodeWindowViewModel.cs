@@ -59,7 +59,7 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task GenerateBarcodeFromModis()
+    public async Task GenerateBarcodeFromModis()
     {
         _index = 0;
         BarcodeList.Clear();

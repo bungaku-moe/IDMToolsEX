@@ -7,16 +7,17 @@ namespace IDMToolsEX.Views;
 
 public partial class BarcodeWindow : Window
 {
-    private MainWindowViewModel _mainWindowViewModel;
+    // private MainWindowViewModel _mainWindowViewModel;
+    private BarcodeWindowViewModel _barcodeViewModel;
 
     public BarcodeWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
-        _mainWindowViewModel = mainWindowViewModel;
-        DataContext = new BarcodeWindowViewModel(mainWindowViewModel, databaseService);
+        // _mainWindowViewModel = mainWindowViewModel;
+        _barcodeViewModel = new BarcodeWindowViewModel(mainWindowViewModel, databaseService);
+        DataContext = _barcodeViewModel;
         Loaded += async (_, _) =>
         {
-            if (DataContext is not BarcodeWindowViewModel viewModel) return;
-            await viewModel.InitializeAsync();
+            await _barcodeViewModel.InitializeAsync();
             InitializeComponent();
         };
     }
@@ -25,12 +26,16 @@ public partial class BarcodeWindow : Window
     {
         if (e.AddedItems.Count <= 0) return;
         var selectedItem = e.AddedItems[0]?.ToString();
-        if (DataContext is not BarcodeWindowViewModel viewModel) return;
-        await viewModel.GetModisShelfsAsync(selectedItem);
+        await _barcodeViewModel.GetModisShelfsAsync(selectedItem);
     }
 
     private void OnInvalidBarcodeChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         // _mainWindowViewModel.Settings.BadBarcodeList.Add(e.Sender.GetValue());
+    }
+
+    private async void OnShelfSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        await _barcodeViewModel.GenerateBarcodeFromModis();
     }
 }

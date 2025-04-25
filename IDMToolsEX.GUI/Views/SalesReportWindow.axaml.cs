@@ -27,8 +27,19 @@ public partial class SalesReportWindow : Window
     [RelayCommand]
     private void DeleteItem(GroupedSaleItem group)
     {
-        ViewModel.GroupedItemsList.Remove(group);
-        _mainWindowViewModel.Settings.SalesReportPluList.Remove(group.Plu);
+        var (items, pluList) = ViewModel.SelectedTabIndex switch
+        {
+            0 => (ViewModel.HematItems, _mainWindowViewModel.Settings.HematPluList),
+            1 => (ViewModel.MurahItems, _mainWindowViewModel.Settings.MurahPluList),
+            2 => (ViewModel.HebohItems, _mainWindowViewModel.Settings.HebohPluList),
+            _ => (null, null)
+        };
+
+        if (items == null || pluList == null) return;
+
+        items.Remove(group);
+        pluList.Remove(group.Plu);
+
         _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
         ViewModel.AppendLog($"Plu {group.Plu} dihapus.");
     }
@@ -36,7 +47,20 @@ public partial class SalesReportWindow : Window
     [RelayCommand]
     private void ClearAllItems()
     {
-        ViewModel.GroupedItemsList.Clear();
+        var (items, pluList) = ViewModel.SelectedTabIndex switch
+        {
+            0 => (ViewModel.HematItems, _mainWindowViewModel.Settings.HematPluList),
+            1 => (ViewModel.MurahItems, _mainWindowViewModel.Settings.MurahPluList),
+            2 => (ViewModel.HebohItems, _mainWindowViewModel.Settings.HebohPluList),
+            _ => (null, null)
+        };
+
+        if (items == null || pluList == null) return;
+
+        items.Clear();
+        pluList.Clear();
+
+        _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
         ViewModel.AppendLog("Daftar item-item dihapus");
     }
 

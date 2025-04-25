@@ -61,20 +61,20 @@
                         <TextBlock Text="Shelf:" VerticalAlignment="Center" />
                         <ComboBox ItemsSource="{Binding ShelfOptions}"
                                   SelectedItem="{Binding SelectedShelfFrom}"
-                                  Width="80" />
+                                  Width="80" SelectionChanged="OnShelfSelectionChanged" />
                         <TextBlock Text="Sampai:" VerticalAlignment="Center" />
                         <ComboBox ItemsSource="{Binding ShelfOptions}"
                                   SelectedItem="{Binding SelectedShelfTo}"
-                                  Width="80" />
+                                  Width="80" SelectionChanged="OnShelfSelectionChanged" />
                     </StackPanel>
 
                     <!-- Generate Barcode Button -->
-                    <Button Content="Buat Barcode Dari Modis"
-                            Command="{Binding GenerateBarcodeFromModisCommand}"
-                            Padding="15,10"
-                            FontWeight="Bold"
-                            HorizontalAlignment="Left"
-                            MinWidth="180" />
+                    <!-- <Button Content="Buat Barcode Dari Modis" -->
+                    <!--         Command="{Binding GenerateBarcodeFromModisCommand}" -->
+                    <!--         Padding="15,10" -->
+                    <!--         FontWeight="Bold" -->
+                    <!--         HorizontalAlignment="Left" -->
+                    <!--         MinWidth="180" /> -->
 
                     <!-- Options -->
                     <CheckBox Content="1 Barcode per Item"
