@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,16 +14,16 @@ public partial class SalesReportWindowViewModel : ViewModelBase
     private readonly DatabaseService _databaseService;
     private readonly MainWindowViewModel _mainWindowViewModel;
 
+    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
+    [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hebohItems = [];
+
     // private readonly CultureInfo _idrCulture = new("id-ID"
 
     [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hematItems = [];
     [ObservableProperty] private ObservableCollection<GroupedSaleItem> _murahItems = [];
-    [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hebohItems = [];
-    [ObservableProperty] private int _selectedTabIndex;
-
-    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
-    [ObservableProperty] private int _shift = 1;
     [ObservableProperty] private string? _searchValue;
+    [ObservableProperty] private int _selectedTabIndex;
+    [ObservableProperty] private int _shift = 1;
 
     public SalesReportWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -35,17 +33,11 @@ public partial class SalesReportWindowViewModel : ViewModelBase
 
     public async Task Initialize()
     {
-        for (var i = 0; i < 3; i++)
-        {
-            SelectedTabIndex = i;
-            await LoadItems();
-        }
-
-        SelectedTabIndex = 0;
+        LoadAllItems();
     }
 
     [RelayCommand]
-    private async Task AddItem()
+    public async Task AddItem()
     {
         if (string.IsNullOrWhiteSpace(SearchValue))
         {
@@ -102,7 +94,18 @@ public partial class SalesReportWindowViewModel : ViewModelBase
         SearchValue = string.Empty;
     }
 
-    public async Task LoadItems()
+    public async Task LoadAllItems()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            SelectedTabIndex = i;
+            await LoadItems();
+        }
+
+        SelectedTabIndex = 0;
+    }
+
+    private async Task LoadItems()
     {
         _mainWindowViewModel.AppendLog("Memuat PLU yang disimpan...!");
 

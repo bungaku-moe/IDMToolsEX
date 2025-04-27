@@ -13,25 +13,31 @@ namespace IDMToolsEX.ViewModels;
 public partial class BarcodeWindowViewModel : ViewModelBase
 {
     private readonly DatabaseService _databaseService;
-    private readonly MainWindowViewModel _mainWindowViewModel;
+
     [ObservableProperty] private ObservableCollection<Barcode> _barcodeList = [];
     private int _index;
+    [ObservableProperty] private bool _isCommaDelimiter;
+    [ObservableProperty] private bool _isNewlineDelimiter = true;
 
     [ObservableProperty] private bool _isOneBarcode = true;
+    [ObservableProperty] private bool _isSpaceDelimiter;
     private string _lastPlu = string.Empty;
+    [ObservableProperty] private int _lineCount;
     [ObservableProperty] private ObservableCollection<(string, string)> _modisOptions = [];
     [ObservableProperty] private ObservableCollection<string> _modisShelfNames = [];
+
+    // private readonly MainWindowViewModel _mainWindowViewModel;
     [ObservableProperty] private string _pluList = string.Empty;
+
     [ObservableProperty] private string _selectedModis;
     [ObservableProperty] private string _selectedModisDescription;
     [ObservableProperty] private string _selectedShelfFrom;
     [ObservableProperty] private string _selectedShelfTo;
-
     [ObservableProperty] private ObservableCollection<string> _shelfOptions = [];
 
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
-        _mainWindowViewModel = mainWindowViewModel;
+        // _mainWindowViewModel = mainWindowViewModel;
         _databaseService = databaseService;
     }
 
@@ -47,13 +53,25 @@ public partial class BarcodeWindowViewModel : ViewModelBase
         SelectedShelfTo = ShelfOptions[^1];
     }
 
+    public void UpdatePluListCount()
+    {
+        LineCount = PluList?.Split(['\n'], StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
+    }
+
     [RelayCommand]
     private async Task GenerateBarcode()
     {
         _index = 0;
         _lastPlu = string.Empty;
         BarcodeList.Clear();
-        var pluList = PluList.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+
+        var delimiters = IsNewlineDelimiter ? ['\r', '\n'] :
+            IsCommaDelimiter ? [','] :
+            IsSpaceDelimiter ? new[] { ' ' } : Array.Empty<char>();
+
+        var pluList = PluList
+            .Split(delimiters, StringSplitOptions.RemoveEmptyEntries)
+            .Select(plu => plu.Trim());
 
         foreach (var plu in pluList) await AddBarcodesToListAsync(plu);
     }
@@ -137,6 +155,6 @@ public partial class Barcode : ObservableObject
     [ObservableProperty] private string _barcodeText = string.Empty;
     [ObservableProperty] private string _description = string.Empty;
     [ObservableProperty] private int _index;
-    [ObservableProperty] private string _plu = string.Empty;
     [ObservableProperty] private bool _isInvalid;
+    [ObservableProperty] private string _plu = string.Empty;
 }

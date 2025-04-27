@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.ViewModels;
@@ -27,5 +28,11 @@ public partial class PriceWindow : Window
     {
         ViewModel.ItemPricesList.Remove(item);
         ViewModel.AppendLog($"Item {item.Plu} dihapus dari daftar.");
+    }
+
+    private void SearchTextBox_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+            ViewModel.GetItemPrice();
     }
 }

@@ -14,26 +14,26 @@ public class SystemSecurity
             @"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", [
                 "DisallowRun", "RestrictRun", "NoKnownFolders", "EnforceShellExtensionSecurity", "NoDrives",
                 "NoFileMenu", "NoManageMyComputerVerb", "NoSharedDocuments", "NoViewContextMenu", "NoViewOnDrive",
-                "NoWritingToUSB"
+                "NoWritingToUSB", "NoAddToUserFilesRoot", "NoFolderOptions"
             ]
         }
     };
 
-    public bool ArePoliciesEnabled()
-    {
-        Console.WriteLine("Checking if specified Group Policies are enabled...");
-
-        foreach (var policy in Policies)
-        foreach (var valueName in policy.Value)
-            if (!IsRegistryValueSet(policy.Key, valueName))
-            {
-                Console.WriteLine($"Policy {valueName} in {policy.Key} is not enabled.");
-                return false;
-            }
-
-        Console.WriteLine("All specified Group Policies are enabled.");
-        return true;
-    }
+    // public bool ArePoliciesEnabled()
+    // {
+    //     Console.WriteLine("Checking if specified Group Policies are enabled...");
+    //
+    //     foreach (var policy in Policies)
+    //     foreach (var valueName in policy.Value)
+    //         if (!IsRegistryValueSet(policy.Key, valueName))
+    //         {
+    //             Console.WriteLine($"Policy {valueName} in {policy.Key} is not enabled.");
+    //             return false;
+    //         }
+    //
+    //     Console.WriteLine("All specified Group Policies are enabled.");
+    //     return true;
+    // }
 
     public void DisablePolicies()
     {
@@ -46,16 +46,16 @@ public class SystemSecurity
         Console.WriteLine("Group Policies have been disabled.");
     }
 
-    public void EnablePolicies()
-    {
-        Console.WriteLine("Enabling specified Group Policies...");
-
-        foreach (var policy in Policies)
-        foreach (var valueName in policy.Value)
-            SetRegistryValue(policy.Key, valueName, 0);
-
-        Console.WriteLine("Group Policies have been enabled.");
-    }
+    // public void EnablePolicies()
+    // {
+    //     Console.WriteLine("Enabling specified Group Policies...");
+    //
+    //     foreach (var policy in Policies)
+    //     foreach (var valueName in policy.Value)
+    //         SetRegistryValue(policy.Key, valueName, 0);
+    //
+    //     Console.WriteLine("Group Policies have been enabled.");
+    // }
 
     private static bool IsRegistryValueSet(string path, string valueName)
     {

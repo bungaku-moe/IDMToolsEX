@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.Models;
@@ -9,8 +9,8 @@ namespace IDMToolsEX.Views;
 
 public partial class SalesReportWindow : Window
 {
-    private MainWindowViewModel _mainWindowViewModel;
-    private SalesReportWindowViewModel ViewModel => (SalesReportWindowViewModel)DataContext;
+    private readonly MainWindowViewModel _mainWindowViewModel;
+    private int _lastTabIndex;
 
     public SalesReportWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -23,6 +23,8 @@ public partial class SalesReportWindow : Window
             await viewModel.Initialize();
         };
     }
+
+    private SalesReportWindowViewModel ViewModel => (SalesReportWindowViewModel)DataContext;
 
     [RelayCommand]
     private void DeleteItem(GroupedSaleItem group)
@@ -66,11 +68,24 @@ public partial class SalesReportWindow : Window
 
     private void OnShiftDateChanged(object? sender, DatePickerSelectedValueChangedEventArgs e)
     {
-        ViewModel.LoadItems();
+        LoadAllItems();
     }
 
     private void OnShiftChanged(object? sender, NumericUpDownValueChangedEventArgs e)
     {
-        ViewModel.LoadItems();
+        LoadAllItems();
+    }
+
+    private void LoadAllItems()
+    {
+        _lastTabIndex = ViewModel.SelectedTabIndex;
+        ViewModel.LoadAllItems();
+        ViewModel.SelectedTabIndex = _lastTabIndex;
+    }
+
+    private void NewPluTextBox_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+            ViewModel.AddItem();
     }
 }

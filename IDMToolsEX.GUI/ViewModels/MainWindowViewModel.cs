@@ -13,13 +13,13 @@ namespace IDMToolsEX.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly SystemSecurity _systemSecurity;
-    [ObservableProperty] private string _databaseConnectText = "Hubungkan";
+    [ObservableProperty] private string _databaseConnectText = "💖 Hubungkan";
     private DatabaseService? _databaseService;
     [ObservableProperty] private bool _isConnected;
+    [ObservableProperty] private Settings _settings;
 
     [ObservableProperty] private SettingsLoader _settingsLoader;
-    [ObservableProperty] private Settings _settings;
-    [ObservableProperty] private string _toggleRestrictionsText = "Matikan Batasan Sistem";
+    // [ObservableProperty] private string _toggleRestrictionsText = "Matikan Batasan Sistem";
 
     public MainWindowViewModel()
     {
@@ -81,24 +81,24 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         finally
         {
-            DatabaseConnectText = IsConnected ? "Putuskan" : "Hubungkan";
+            DatabaseConnectText = IsConnected ? "💔 Putuskan" : "💖 Hubungkan";
         }
     }
 
     [RelayCommand]
     private void ToggleRestrictions()
     {
-        switch (_systemSecurity.ArePoliciesEnabled())
-        {
-            case true:
-                ToggleRestrictionsText = "Matikan Batasan Sistem";
-                _systemSecurity.DisablePolicies();
-                break;
-            case false:
-                ToggleRestrictionsText = "Pulihkan Batasan Sistem";
-                _systemSecurity.EnablePolicies();
-                break;
-        }
+        // switch (_systemSecurity.ArePoliciesEnabled())
+        // {
+        //     case true:
+        // ToggleRestrictionsText = "Matikan Batasan Sistem";
+        _systemSecurity.DisablePolicies();
+        //         break;
+        //     case false:
+        //         ToggleRestrictionsText = "Pulihkan Batasan Sistem";
+        //         _systemSecurity.EnablePolicies();
+        //         break;
+        // }
     }
 
     [RelayCommand]

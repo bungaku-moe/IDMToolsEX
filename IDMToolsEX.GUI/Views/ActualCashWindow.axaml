@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="250"
         x:Class="IDMToolsEX.Views.ActualCashWindow"
         x:DataType="vm:ActualCashWindowViewModel"
-        MaxWidth="480" MinWidth="480" MinHeight="680"
+        MaxWidth="650" MinWidth="650" MinHeight="680"
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Aktual Kas"
         TransparencyLevelHint="AcrylicBlur"
@@ -17,57 +17,68 @@
     <!-- </Window.DataContext> -->
 
     <StackPanel Margin="20 5" Spacing="15">
-        <HeaderedContentControl Header="Initial">
-            <StackPanel Spacing="8">
-                <StackPanel HorizontalAlignment="Stretch" Spacing="3">
-                    <TextBlock Text="Tanggal:" />
-                    <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" />
-                </StackPanel>
-
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Shift:" />
-                    <NumericUpDown Minimum="1" Maximum="3" FormatString="0" Value="{Binding Shift, Mode=TwoWay}" />
-                </StackPanel>
-
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Station:" />
-                    <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station, Mode=TwoWay}" />
-                </StackPanel>
+        <!-- <HeaderedContentControl Header="Initial"> -->
+        <StackPanel Spacing="8">
+            <StackPanel HorizontalAlignment="Stretch" Spacing="3">
+                <TextBlock Text="📅 Tanggal:" />
+                <DatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch"
+                            SelectedDateChanged="OnSelectedDateChanged" />
             </StackPanel>
-        </HeaderedContentControl>
-        <HeaderedContentControl Header="Kalkulasi">
-            <StackPanel Spacing="8">
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Total Setoran Sales:" />
-                    <NumericUpDown
-                        ShowButtonSpinner="False"
-                        Value="{Binding SalesDeposit, Mode=TwoWay}"
-                        FormatString="C0" />
-                </StackPanel>
 
-                <StackPanel Spacing="3">
-                    <TextBlock Text="Total Uang Fisik:" />
-                    <NumericUpDown
-                        ShowButtonSpinner="False"
-                        Value="{Binding PhysicalMoney, Mode=TwoWay}"
-                        FormatString="C0" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Hitung Aktual Kas"
-                            Command="{Binding CalculateActualCashCommand}" HorizontalContentAlignment="Center"
-                            FontWeight="Medium" />
-                </StackPanel>
+            <StackPanel Spacing="3">
+                <TextBlock Text="⌚ Shift:" />
+                <NumericUpDown Minimum="1" Maximum="3" FormatString="0" Value="{Binding Shift, Mode=TwoWay}"
+                               ValueChanged="OnShiftChanged" />
             </StackPanel>
-        </HeaderedContentControl>
-        <DataGrid ItemsSource="{Binding CashSummary}" AutoGenerateColumns="False" GridLinesVisibility="All"
-                  CanUserResizeColumns="True" CanUserSortColumns="True" CanUserReorderColumns="True"
-                  HeadersVisibility="Column"
-                  IsReadOnly="True">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Nama" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Nilai" Binding="{Binding Value}" Width="*" />
-            </DataGrid.Columns>
-        </DataGrid>
+
+            <StackPanel Spacing="3">
+                <TextBlock Text="🖥️ Station:" />
+                <NumericUpDown Minimum="1" Maximum="2" FormatString="00" Value="{Binding Station, Mode=TwoWay}"
+                               ValueChanged="OnStationChanged" />
+            </StackPanel>
+
+            <StackPanel Spacing="3">
+                <TextBlock Text="💵 Total Uang Fisik:" />
+                <NumericUpDown
+                    ShowButtonSpinner="False"
+                    Value="{Binding PhysicalMoney, Mode=TwoWay}"
+                    FormatString="C0" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="💲 Hitung Variance"
+                        Command="{Binding CalculateActualCashCommand}" HorizontalContentAlignment="Center"
+                        FontWeight="Medium" />
+            </StackPanel>
+        </StackPanel>
+        <!-- </HeaderedContentControl> -->
+        <!-- <HeaderedContentControl Header="Kalkulasi"> -->
+        <!--     <StackPanel Spacing="8"> -->
+        <!-- <StackPanel Spacing="3"> -->
+        <!--     <TextBlock Text="Total Setoran Sales:" /> -->
+        <!--     <NumericUpDown -->
+        <!--         ShowButtonSpinner="False" -->
+        <!--         Value="{Binding SalesDeposit, Mode=TwoWay}" -->
+        <!--         FormatString="C0" /> -->
+        <!-- </StackPanel> -->
+
+        <!-- </StackPanel> -->
+        <!-- </HeaderedContentControl> -->
+        <TextBlock
+            Text="🧮 Aktual Kas = Total Uang Konsumen - (Total Kembalian + Total Cashout + Setoran Sales + BA Virtual (Struk) + Modal)"
+            TextWrapping="Wrap" HorizontalAlignment="Left" MaxWidth="480" Foreground="DarkGray" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <DataGrid ItemsSource="{Binding CashSummary}" AutoGenerateColumns="False" GridLinesVisibility="All"
+                      CanUserResizeColumns="True" CanUserSortColumns="True" CanUserReorderColumns="True"
+                      HeadersVisibility="Column"
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ℹ️ Nama" Binding="{Binding Name}" Width="1.3*" />
+                    <DataGridTextColumn Header="💲 Nilai" Binding="{Binding Value}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </ScrollViewer>
+
     </StackPanel>
 </Window>

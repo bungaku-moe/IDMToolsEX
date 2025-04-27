@@ -3,13 +3,15 @@
         xmlns:vm="using:IDMToolsEX.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        xmlns:ia="using:Avalonia.Xaml.Interactions.Custom"
         mc:Ignorable="d"
         x:Class="IDMToolsEX.Views.SalesReportWindow"
         x:Name="SalesReportWindowName"
         x:DataType="vm:SalesReportWindowViewModel"
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Laporan Sales"
-        MinWidth="800" MinHeight="300"
+        MinWidth="900" MinHeight="300"
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke">
 
@@ -36,18 +38,37 @@
             <!-- PLU Input -->
             <StackPanel Spacing="5" Width="200">
                 <TextBlock Text="PLU:" HorizontalAlignment="Left" FontWeight="Medium" />
-                <TextBox Text="{Binding SearchValue, Mode=TwoWay}" Watermark="PLU" />
+                <TextBox x:Name="NewPluTextBox" Text="{Binding SearchValue, Mode=TwoWay}" Watermark="PLU"
+                         KeyDown="NewPluTextBox_OnKeyDown">
+                    <i:Interaction.Behaviors>
+                        <EventTriggerBehavior EventName="Loaded">
+                            <ia:FocusControlAction />
+                        </EventTriggerBehavior>
+                    </i:Interaction.Behaviors>
+                </TextBox>
             </StackPanel>
 
             <!-- Add Button -->
-            <Button Content="+" Width="80" Height="35"
+            <Button Content="➕" Width="80" Height="35"
                     VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                     FontWeight="Black"
-                    Command="{Binding AddItemCommand}" />
-            <Button Content="Hapus Semua di Tab Sekarang" Height="35"
+                    Command="{Binding AddItemCommand}">
+                <i:Interaction.Behaviors>
+                    <EventTriggerBehavior EventName="Click">
+                        <ia:FocusControlAction TargetControl="{Binding ElementName=NewPluTextBox}" />
+                    </EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </Button>
+            <Button Content="Hapus Semua" Height="35"
                     VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                     FontWeight="Black"
-                    Command="{Binding ClearAllItemsCommand, ElementName=SalesReportWindowName}" />
+                    Command="{Binding ClearAllItemsCommand, ElementName=SalesReportWindowName}">
+                <i:Interaction.Behaviors>
+                    <EventTriggerBehavior EventName="Click">
+                        <ia:FocusControlAction TargetControl="{Binding ElementName=NewPluTextBox}" />
+                    </EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </Button>
         </StackPanel>
 
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4">
@@ -61,7 +82,7 @@
                                         <Expander.Header>
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
-                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
                                                 <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
@@ -100,7 +121,7 @@
                                         <Expander.Header>
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
-                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
                                                 <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
@@ -139,7 +160,7 @@
                                         <Expander.Header>
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
-                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="500" />
+                                                <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
                                                 <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"

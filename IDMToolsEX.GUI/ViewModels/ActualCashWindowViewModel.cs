@@ -11,15 +11,19 @@ namespace IDMToolsEX.ViewModels;
 public partial class ActualCashWindowViewModel : ViewModelBase
 {
     private readonly DatabaseService _databaseService;
+
     private readonly CultureInfo _idrCulture = new("id-ID");
-    private readonly MainWindowViewModel _mainWindowViewModel;
+
+    // private readonly MainWindowViewModel _mainWindowViewModel;
     [ObservableProperty] private ObservableCollection<CashSummaryRow> _cashSummary = [];
 
-    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
+    [ObservableProperty] private DateTimeOffset? _date = DateTimeOffset.Now;
     [ObservableProperty] private decimal? _expectedActualCash = 0;
     [ObservableProperty] private decimal? _modalMoney = 100000;
+
     [ObservableProperty] private string? _physicalMoney = "0";
-    [ObservableProperty] private string? _salesDeposit = "0";
+
+    // [ObservableProperty] private string? _salesDeposit = "0";
     [ObservableProperty] private int? _shift = 1;
     [ObservableProperty] private int? _station = 1;
     [ObservableProperty] private decimal? _totalCashout;
@@ -30,75 +34,89 @@ public partial class ActualCashWindowViewModel : ViewModelBase
     public ActualCashWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        _mainWindowViewModel = mainWindowViewModel;
+        // _mainWindowViewModel = mainWindowViewModel;
     }
 
-    public void Initialize()
+    public async Task Initialize()
     {
-        CashSummary =
-        [
-            new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(0) },
-            new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(0) },
-            new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(0) },
-            new CashSummaryRow
-                { Name = "(i) Total BA Virtual (Cashout, Struk)", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" },
-            new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(ModalMoney) },
-            new CashSummaryRow
-            {
-                Name = "Aktual Kas, BA Virtual Cashout",
-                Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}"
-            },
-            new CashSummaryRow { Name = "Variance", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" }
-        ];
+        // CashSummary =
+        // [
+        //     new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(0) },
+        //     new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(0) },
+        //     new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(0) },
+        //     new CashSummaryRow
+        //         { Name = "(i) Total BA Virtual (Cashout, Struk)", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" },
+        //     new CashSummaryRow { Name = "(i) Total Nominal Cancel", Value = FormatCurrency(0) },
+        //     new CashSummaryRow { Name = "(i) Total Setoran Sales", Value = FormatCurrency(0) },
+        //     new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(ModalMoney) },
+        //     new CashSummaryRow
+        //     {
+        //         Name = "Aktual Kas, BA Virtual Cashout",
+        //         Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}"
+        //     },
+        //     new CashSummaryRow { Name = "Variance", Value = $"{FormatCurrency(0)}, {FormatCurrency(0)}" }
+        // ];
+        await CalculateActualCash();
     }
+
+    // [RelayCommand]
+    // private async Task GetSalesInfo()
+    // {
+    //     _mainWindowViewModel.AppendLog("Mendapatkan informasi sales...");
+    //     if (!_databaseService.IsConnected)
+    //     {
+    //         _mainWindowViewModel.AppendLog("Gagal mendapatkan informasi sales! Database tidak terhubung.");
+    //         return;
+    //     }
+    //
+    //     var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift ?? 1, Station ?? 1);
+    //     TotalConsumentCash = result.totalConsumentCash;
+    //     TotalChangeCash = result.totalChangeCash;
+    //     ExpectedActualCash = result.totalActualCash;
+    //     TotalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift ?? 1, Station ?? 1);
+    // }
 
     [RelayCommand]
-    private async Task GetSalesInfo()
+    public async Task CalculateActualCash()
     {
-        _mainWindowViewModel.AppendLog("Mendapatkan informasi sales...");
-        if (!_databaseService.IsConnected)
-        {
-            _mainWindowViewModel.AppendLog("Gagal mendapatkan informasi sales! Database tidak terhubung.");
-            return;
-        }
-
-        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift ?? 1, Station ?? 1);
-        TotalConsumentCash = result.totalConsumentCash;
-        TotalChangeCash = result.totalChangeCash;
-        ExpectedActualCash = result.totalActualCash;
-        TotalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift ?? 1, Station ?? 1);
-    }
-
-    [RelayCommand]
-    private async Task CalculateActualCash()
-    {
-        var result = await _databaseService.GetExpectedActualCashAsync(Date, Shift ?? 1, Station ?? 1);
-        var totalCashout = await _databaseService.GetTotalCashoutAsync(Date, Shift ?? 1, Station ?? 1);
-        var beritaAcaraVirtual = await _databaseService.GetTotalBeritaAcaraVirtualAsync(Date, Shift ?? 1, Station ?? 1);
-        var salesDeposit = ParseDecimal(SalesDeposit);
+        var expectedActualCash =
+            await _databaseService.GetExpectedActualCashAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
+        var totalCashout =
+            await _databaseService.GetTotalCashoutAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
+        var beritaAcaraVirtual =
+            await _databaseService.GetTotalBeritaAcaraVirtualAsync(Date ?? DateTimeOffset.Now, Shift ?? 1,
+                Station ?? 1);
+        var salesDeposit =
+            await _databaseService.GetTotalSalesDepositAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
+        var totalCancel =
+            await _databaseService.GetTotalCancelAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
+        var actualCash = expectedActualCash.totalActualCash - (totalCashout + salesDeposit + beritaAcaraVirtual.Struk);
         var physicalMoney = ParseDecimal(PhysicalMoney);
-        var actualCash = result.totalActualCash - (totalCashout + salesDeposit + beritaAcaraVirtual.Struk);
 
         CashSummary.Clear();
         CashSummary =
         [
-            new CashSummaryRow { Name = "(i) Total Uang Konsumen", Value = FormatCurrency(result.totalConsumentCash) },
-            new CashSummaryRow { Name = "(i) Total Uang Kembalian", Value = FormatCurrency(result.totalChangeCash) },
-            new CashSummaryRow { Name = "(i) Total Tarik Tunai", Value = FormatCurrency(totalCashout) },
+            new CashSummaryRow
+                { Name = "ℹ️ Total Uang Konsumen", Value = FormatCurrency(expectedActualCash.totalConsumentCash) },
+            new CashSummaryRow
+                { Name = "ℹ️ Total Uang Kembalian", Value = FormatCurrency(expectedActualCash.totalChangeCash) },
+            new CashSummaryRow { Name = "ℹ️ Total Tarik Tunai", Value = FormatCurrency(totalCashout) },
             new CashSummaryRow
             {
-                Name = "(i) Total BA Virtual (Cashout, Struk)",
+                Name = "ℹ️ Total BA Virtual (Cashout, Struk)",
                 Value = $"{FormatCurrency(beritaAcaraVirtual.Cashout)}, {FormatCurrency(beritaAcaraVirtual.Struk)}"
             },
-            new CashSummaryRow { Name = "(i) Modal", Value = FormatCurrency(ModalMoney) },
+            new CashSummaryRow { Name = "ℹ️ Total Nominal Cancel", Value = FormatCurrency(totalCancel) },
+            new CashSummaryRow { Name = "ℹ️ Total Setoran Sales", Value = FormatCurrency(salesDeposit) },
+            new CashSummaryRow { Name = "ℹ️ Modal", Value = FormatCurrency(ModalMoney) },
             new CashSummaryRow
             {
-                Name = "Aktual Kas, + BA Virtual Cashout",
+                Name = "Aktual Kas, Aktual Kas + BA Virtual (Cashout)",
                 Value = $"{FormatCurrency(actualCash)}, {FormatCurrency(actualCash - beritaAcaraVirtual.Cashout)}"
             },
             new CashSummaryRow
             {
-                Name = "Variance",
+                Name = "Variance, Variance + BA Virtual (Cashout)",
                 Value =
                     $"{FormatCurrency(physicalMoney - actualCash)}, {FormatCurrency(physicalMoney - (actualCash + beritaAcaraVirtual.Cashout))}"
             }

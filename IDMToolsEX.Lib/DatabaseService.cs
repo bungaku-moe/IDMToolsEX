@@ -10,6 +10,63 @@ public class DatabaseService : IDisposable
     private readonly string _connectionString;
     private MySqlConnection? _connection;
 
+    #region Sales Report
+
+    // public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
+    //     string plu, DateTimeOffset date, int shift)
+    // {
+    //     await EnsureConnectedAsync();
+    //
+    //     const string query = """
+    //                              SELECT QTY, PRICE, JAM, RTYPE
+    //                              FROM mtran
+    //                              WHERE PLU = @Plu
+    //                              AND DATE(TANGGAL) = DATE(@Tanggal)
+    //                              AND SHIFT = @Shift;
+    //                          """;
+    //
+    //     // Convert DateTimeOffset to UTC and extract date part
+    //     var utcDate = date.UtcDateTime.Date;
+    //
+    //     var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(
+    //         query,
+    //         new
+    //         {
+    //             Plu = plu,
+    //             Tanggal = utcDate, // Pass as DateTime
+    //             Shift = shift
+    //         });
+    //
+    //     return result.ToList();
+    // }
+
+    public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
+        string plu, DateTimeOffset date, int shift)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                                 SELECT
+                                     CAST(QTY AS SIGNED) AS QTY,
+                                     CAST(PRICE AS DECIMAL(10, 2)) AS PRICE,
+                                     CAST(JAM AS CHAR) AS JAM,
+                                     CAST(RTYPE AS CHAR) AS RTYPE
+                                 FROM mtran
+                                 WHERE PLU = @Plu AND DATE(TANGGAL) = @Tanggal AND SHIFT = @Shift;
+                             """;
+
+        var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(query, new
+        {
+            Plu = plu,
+            Tanggal = date.ToString("yyyy-MM-dd"),
+            Shift = shift
+        });
+
+        return result.ToList();
+    }
+
+    #endregion
+
     #region Connection
 
     public DatabaseService(string database, string host, string port, string username, string password)
@@ -173,6 +230,54 @@ public class DatabaseService : IDisposable
         return result;
     }
 
+    public async Task<decimal> GetTotalSalesDepositAsync(DateTimeOffset date, int shift, int station)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT
+                                 AMBIL
+                             FROM serah
+                             WHERE
+                                 TANGGAL = @Tanggal AND
+                                 SHIFT = @Shift AND
+                                 STATION = @Station;
+                             """;
+
+        var results = await _connection.QueryAsync<decimal>(query, new
+        {
+            Tanggal = date.ToString("yyyy-MM-dd"),
+            Shift = shift,
+            Station = station.ToString("D2")
+        });
+
+        return results.Sum();
+    }
+
+    public async Task<decimal> GetTotalCancelAsync(DateTimeOffset date, int shift, int station)
+    {
+        await EnsureConnectedAsync();
+
+        const string query = """
+                             SELECT
+                                 GROSS
+                             FROM cancel
+                             WHERE
+                                 TANGGAL = @Tanggal AND
+                                 SHIFT = @Shift AND
+                                 STATION = @Station;
+                             """;
+
+        var results = await _connection.QueryAsync<decimal>(query, new
+        {
+            Tanggal = date.ToString("yyyy-MM-dd"),
+            Shift = shift,
+            Station = station.ToString("D2")
+        });
+
+        return results.Sum();
+    }
+
     #endregion
 
     #region Display Barang
@@ -329,63 +434,6 @@ public class DatabaseService : IDisposable
             return null;
 
         return await GetPromotionByPluAsync(plu);
-    }
-
-    #endregion
-
-    #region Sales Report
-
-    // public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
-    //     string plu, DateTimeOffset date, int shift)
-    // {
-    //     await EnsureConnectedAsync();
-    //
-    //     const string query = """
-    //                              SELECT QTY, PRICE, JAM, RTYPE
-    //                              FROM mtran
-    //                              WHERE PLU = @Plu
-    //                              AND DATE(TANGGAL) = DATE(@Tanggal)
-    //                              AND SHIFT = @Shift;
-    //                          """;
-    //
-    //     // Convert DateTimeOffset to UTC and extract date part
-    //     var utcDate = date.UtcDateTime.Date;
-    //
-    //     var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(
-    //         query,
-    //         new
-    //         {
-    //             Plu = plu,
-    //             Tanggal = utcDate, // Pass as DateTime
-    //             Shift = shift
-    //         });
-    //
-    //     return result.ToList();
-    // }
-
-    public async Task<List<(int Qty, decimal Price, string Time, string Rtype)>> GetTransactionDetailsAsync(
-        string plu, DateTimeOffset date, int shift)
-    {
-        await EnsureConnectedAsync();
-
-        const string query = """
-                                 SELECT
-                                     CAST(QTY AS SIGNED) AS QTY,
-                                     CAST(PRICE AS DECIMAL(10, 2)) AS PRICE,
-                                     CAST(JAM AS CHAR) AS JAM,
-                                     CAST(RTYPE AS CHAR) AS RTYPE
-                                 FROM mtran
-                                 WHERE PLU = @Plu AND DATE(TANGGAL) = @Tanggal AND SHIFT = @Shift;
-                             """;
-
-        var result = await _connection.QueryAsync<(int Qty, decimal Price, string Time, string Rtype)>(query, new
-        {
-            Plu = plu,
-            Tanggal = date.ToString("yyyy-MM-dd"),
-            Shift = shift
-        });
-
-        return result.ToList();
     }
 
     #endregion

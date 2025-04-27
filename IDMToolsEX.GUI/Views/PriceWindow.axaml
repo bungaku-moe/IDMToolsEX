@@ -3,6 +3,8 @@
         xmlns:vm="using:IDMToolsEX.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="using:Avalonia.Xaml.Interactivity"
+        xmlns:ia="using:Avalonia.Xaml.Interactions.Custom"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="IDMToolsEX.Views.PriceWindow"
         x:DataType="vm:PriceWindowViewModel"
@@ -23,10 +25,22 @@
                                  VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
-            <TextBox Text="{Binding SearchValue}" MinWidth="300" VerticalAlignment="Center"
-                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="5" />
+            <TextBox x:Name="SearchTextBox" Text="{Binding SearchValue}" MinWidth="300" VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="5" KeyDown="SearchTextBox_OnKeyDown">
+                <i:Interaction.Behaviors>
+                    <EventTriggerBehavior EventName="Loaded">
+                        <ia:FocusControlAction />
+                    </EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </TextBox>
             <Button Content="Cari" Command="{Binding GetItemPriceCommand}" Padding="10" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="80" FontWeight="Bold" />
+                    VerticalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="80" FontWeight="Bold">
+                <i:Interaction.Behaviors>
+                    <EventTriggerBehavior EventName="Click">
+                        <ia:FocusControlAction TargetControl="{Binding ElementName=SearchTextBox}" />
+                    </EventTriggerBehavior>
+                </i:Interaction.Behaviors>
+            </Button>
         </StackPanel>
         <DataGrid Grid.Row="1" ItemsSource="{Binding ItemPricesList}" AutoGenerateColumns="False"
                   CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True" Margin="5">
@@ -44,8 +58,8 @@
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="MULAI" Binding="{Binding Start}" Width="0.9*" />
                 <DataGridTextColumn Header="AKHIR" Binding="{Binding End}" Width="0.9*" />
-                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.85*" />
-                <DataGridTextColumn Header="BARCODE" Binding="{Binding Barcode}" Width="1.3*" />
+                <!-- <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.85*" /> -->
+                <!-- <DataGridTextColumn Header="BARCODE" Binding="{Binding Barcode}" Width="1.3*" /> -->
                 <DataGridTemplateColumn IsReadOnly="False">
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>

@@ -8,7 +8,7 @@ namespace IDMToolsEX.Views;
 public partial class BarcodeWindow : Window
 {
     // private MainWindowViewModel _mainWindowViewModel;
-    private BarcodeWindowViewModel _barcodeViewModel;
+    private readonly BarcodeWindowViewModel _barcodeViewModel;
 
     public BarcodeWindow(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -37,5 +37,10 @@ public partial class BarcodeWindow : Window
     private async void OnShelfSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         await _barcodeViewModel.GenerateBarcodeFromModis();
+    }
+
+    private void OnPluListChanged(object? sender, TextChangedEventArgs e)
+    {
+        _barcodeViewModel.UpdatePluListCount();
     }
 }

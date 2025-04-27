@@ -27,7 +27,7 @@ public partial class PriceWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task GetItemPrice()
+    public async Task GetItemPrice()
     {
         if (string.IsNullOrWhiteSpace(SearchValue))
         {
