@@ -20,6 +20,10 @@ public partial class BarcodeWindow : Window
             await _barcodeViewModel.InitializeAsync();
             InitializeComponent();
         };
+        Closed += (sender, args) =>
+        {
+            _barcodeViewModel.Cleanup();
+        };
     }
 
     private async void OnModisSelectionChanged(object? sender, SelectionChangedEventArgs e)

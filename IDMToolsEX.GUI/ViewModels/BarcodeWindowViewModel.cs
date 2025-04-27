@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -35,6 +36,9 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [ObservableProperty] private string _selectedShelfTo;
     [ObservableProperty] private ObservableCollection<string> _shelfOptions = [];
 
+    [ObservableProperty] private bool _isLoading;
+    private CancellationTokenSource _cancellationTokenSource = new();
+
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
         // _mainWindowViewModel = mainWindowViewModel;
@@ -53,6 +57,12 @@ public partial class BarcodeWindowViewModel : ViewModelBase
         SelectedShelfTo = ShelfOptions[^1];
     }
 
+    public void Cleanup()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+
     public void UpdatePluListCount()
     {
         LineCount = PluList?.Split(['\n'], StringSplitOptions.RemoveEmptyEntries).Length ?? 0;
@@ -61,6 +71,11 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateBarcode()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
+
+        IsLoading = true;
         _index = 0;
         _lastPlu = string.Empty;
         BarcodeList.Clear();
@@ -73,27 +88,63 @@ public partial class BarcodeWindowViewModel : ViewModelBase
             .Split(delimiters, StringSplitOptions.RemoveEmptyEntries)
             .Select(plu => plu.Trim());
 
-        foreach (var plu in pluList) await AddBarcodesToListAsync(plu);
+        try
+        {
+            foreach (var plu in pluList)
+            {
+                token.ThrowIfCancellationRequested();
+                await AddBarcodesToListAsync(plu, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle cancellation if needed
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     [RelayCommand]
     public async Task GenerateBarcodeFromModis()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
+
+        IsLoading = true;
         _index = 0;
         BarcodeList.Clear();
         _lastPlu = string.Empty;
-        var pluList = await _databaseService.GetShelfPluAsync(SelectedModis, SelectedShelfFrom, SelectedShelfTo);
 
-        foreach (var plu in pluList) await AddBarcodesToListAsync(plu);
+        try
+        {
+            var pluList =
+                await _databaseService.GetShelfPluAsync(SelectedModis, SelectedShelfFrom, SelectedShelfTo);
+            foreach (var plu in pluList)
+            {
+                token.ThrowIfCancellationRequested();
+                await AddBarcodesToListAsync(plu, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle cancellation if needed
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
-    private async Task AddBarcodesToListAsync(string plu)
+    private async Task AddBarcodesToListAsync(string plu, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
+
         var details = await _databaseService.GetProductDescriptionAsync(plu);
         var barcodes = (await _databaseService.GetBarcodesAsync(plu)).ToArray();
-        // var enumerable = barcodes as string[] ?? barcodes.ToArray();
 
-        // Check if this is a new PLU
         if (_lastPlu != plu)
         {
             _index++;
@@ -101,11 +152,13 @@ public partial class BarcodeWindowViewModel : ViewModelBase
         }
 
         if (IsOneBarcode && barcodes.Length != 0)
+        {
             foreach (var barcode in barcodes)
             {
+                token.ThrowIfCancellationRequested();
                 if (string.IsNullOrEmpty(barcode)) continue;
 
-                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
+                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode, token);
                 BarcodeList.Add(new Barcode
                 {
                     Index = _index,
@@ -117,10 +170,13 @@ public partial class BarcodeWindowViewModel : ViewModelBase
                 });
                 break;
             }
+        }
         else
+        {
             foreach (var barcode in barcodes)
             {
-                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode);
+                token.ThrowIfCancellationRequested();
+                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode, token);
                 BarcodeList.Add(new Barcode
                 {
                     Index = _index,
@@ -131,8 +187,8 @@ public partial class BarcodeWindowViewModel : ViewModelBase
                     BarcodeImage = barcodeImage
                 });
             }
+        }
     }
-
 
     public async Task GetModisShelfsAsync(string selectedItem)
     {

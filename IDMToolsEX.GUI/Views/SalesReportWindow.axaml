@@ -13,7 +13,8 @@
         Title="IDMToolsEX - Laporan Sales"
         MinWidth="900" MinHeight="300"
         TransparencyLevelHint="AcrylicBlur"
-        Background="WhiteSmoke">
+        Background="WhiteSmoke"
+        IsEnabled="{Binding !IsLoading}">
 
     <Grid RowDefinitions="Auto, *, Auto" Margin="10">
 
@@ -83,7 +84,7 @@
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
                                                 <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
-                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <TextBlock Text="{Binding TotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
                                                         CommandParameter="{Binding}"
@@ -93,7 +94,7 @@
                                                         VerticalContentAlignment="Center" />
                                             </DockPanel>
                                         </Expander.Header>
-
+                
                                         <DataGrid ItemsSource="{Binding Items}"
                                                   AutoGenerateColumns="False"
                                                   CanUserResizeColumns="True"
@@ -112,6 +113,45 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </TabItem>
+                <!-- <TabItem Header="Hemat" FontSize="20"> -->
+                <!--     <ScrollViewer> -->
+                <!--         <ItemsControl ItemsSource="{Binding HematItems}"> -->
+                <!--             <ItemsControl.ItemTemplate> -->
+                <!--                 <DataTemplate> -->
+                <!--                     <Expander Margin="0 4 0 0" HorizontalAlignment="Stretch"> -->
+                <!--                         <Expander.Header> -->
+                <!--                             <DockPanel> -->
+                <!--                                 <TextBlock Text="{Binding Name}" Width="200" /> -->
+                <!--                                 <TextBlock Text="{Binding TotalQty}" Margin="8,0" Width="80" /> -->
+                <!--                                 <Button Content="Hapus" -->
+                <!--                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}" -->
+                <!--                                         CommandParameter="{Binding}" -->
+                <!--                                         Margin="8,0,0,0" -->
+                <!--                                         Padding="6,4" HorizontalAlignment="Right" Width="80" -->
+                <!--                                         HorizontalContentAlignment="Center" -->
+                <!--                                         VerticalContentAlignment="Center" /> -->
+                <!--                             </DockPanel> -->
+                <!--                         </Expander.Header> -->
+                <!-- -->
+                <!--                         <DataGrid ItemsSource="{Binding Items}" -->
+                <!--                                   AutoGenerateColumns="False" -->
+                <!--                                   CanUserResizeColumns="True" -->
+                <!--                                   HeadersVisibility="Column" -->
+                <!--                                   Margin="0" Padding="0"> -->
+                <!--                             <DataGrid.Columns> -->
+                <!--                                 <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="0.2*" /> -->
+                <!--                                 <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" /> -->
+                <!--                                 <DataGridTextColumn Header="Qty" Binding="{Binding Qty}" Width="80" /> -->
+                <!--                                 <DataGridTextColumn Header="Waktu" Binding="{Binding Time}" Width="120" /> -->
+                <!--                             </DataGrid.Columns> -->
+                <!--                         </DataGrid> -->
+                <!--                     </Expander> -->
+                <!--                 </DataTemplate> -->
+                <!--             </ItemsControl.ItemTemplate> -->
+                <!--         </ItemsControl> -->
+                <!--     </ScrollViewer> -->
+                <!-- </TabItem> -->
+                
                 <TabItem Header="Murah" FontSize="20">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding MurahItems}">
@@ -122,7 +162,7 @@
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
                                                 <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
-                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <TextBlock Text="{Binding TotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
                                                         CommandParameter="{Binding}"
@@ -151,6 +191,7 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </TabItem>
+                
                 <TabItem Header="Heboh" FontSize="20">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding HebohItems}">
@@ -161,7 +202,7 @@
                                             <DockPanel>
                                                 <TextBlock Text="{Binding Plu}" Width="80" />
                                                 <TextBlock Text="{Binding Name}" Margin="8,0" Width="490" />
-                                                <TextBlock Text="{Binding ItemsTotalQty}" Margin="8,0" Width="60" />
+                                                <TextBlock Text="{Binding TotalQty}" Margin="8,0" Width="60" />
                                                 <Button Content="Hapus"
                                                         Command="{Binding DeleteItemCommand, ElementName=SalesReportWindowName}"
                                                         CommandParameter="{Binding}"

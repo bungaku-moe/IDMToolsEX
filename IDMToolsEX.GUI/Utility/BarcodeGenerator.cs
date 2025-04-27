@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
@@ -11,10 +12,12 @@ namespace IDMToolsEX.Utility;
 
 public static class BarcodeGenerator
 {
-    public static async Task<Bitmap?> GenerateBarcodeImageAsync(string text)
+    public static async Task<Bitmap?> GenerateBarcodeImageAsync(string text, CancellationToken token)
     {
         return await Task.Run(() =>
         {
+            token.ThrowIfCancellationRequested();
+
             var writer = new BarcodeWriterPixelData
             {
                 Format = BarcodeFormat.CODE_128,
@@ -43,20 +46,23 @@ public static class BarcodeGenerator
             {
                 var buffer = (uint*)lockedBuffer.Address;
                 for (var y = 0; y < pixelData.Height; y++)
-                for (var x = 0; x < pixelData.Width; x++)
                 {
-                    var offset = (y * pixelData.Width + x) * 4;
-                    var color = Color.FromArgb(
-                        pixelData.Pixels[offset + 3],
-                        pixelData.Pixels[offset + 2],
-                        pixelData.Pixels[offset + 1],
-                        pixelData.Pixels[offset]);
+                    token.ThrowIfCancellationRequested();
+                    for (var x = 0; x < pixelData.Width; x++)
+                    {
+                        var offset = (y * pixelData.Width + x) * 4;
+                        var color = Color.FromArgb(
+                            pixelData.Pixels[offset + 3],
+                            pixelData.Pixels[offset + 2],
+                            pixelData.Pixels[offset + 1],
+                            pixelData.Pixels[offset]);
 
-                    buffer[y * lockedBuffer.RowBytes / 4 + x] = color.ToUInt32();
+                        buffer[y * lockedBuffer.RowBytes / 4 + x] = color.ToUInt32();
+                    }
                 }
             }
 
             return bitmap;
-        });
+        }, token);
     }
 }

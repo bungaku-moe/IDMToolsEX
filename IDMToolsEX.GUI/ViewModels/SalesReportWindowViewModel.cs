@@ -14,16 +14,17 @@ public partial class SalesReportWindowViewModel : ViewModelBase
     private readonly DatabaseService _databaseService;
     private readonly MainWindowViewModel _mainWindowViewModel;
 
-    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
-    [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hebohItems = [];
-
-    // private readonly CultureInfo _idrCulture = new("id-ID"
-
     [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hematItems = [];
     [ObservableProperty] private ObservableCollection<GroupedSaleItem> _murahItems = [];
-    [ObservableProperty] private string? _searchValue;
+    [ObservableProperty] private ObservableCollection<GroupedSaleItem> _hebohItems = [];
+
+    [ObservableProperty] private DateTimeOffset _date = DateTimeOffset.Now;
     [ObservableProperty] private int _selectedTabIndex;
     [ObservableProperty] private int _shift = 1;
+    [ObservableProperty] private string? _searchValue;
+
+    [ObservableProperty] private bool _isLoading;
+    // private readonly CultureInfo _idrCulture = new("id-ID"
 
     public SalesReportWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
@@ -62,7 +63,7 @@ public partial class SalesReportWindowViewModel : ViewModelBase
         var itemDetails = await _databaseService.GetItemDetailsByPluAsync(SearchValue);
         var transactionDetails = await _databaseService.GetTransactionDetailsAsync(SearchValue, Date, Shift);
 
-        var itemList = new ObservableCollection<SaleItem>(
+        var purchaseHistory = new ObservableCollection<SaleItem>(
             transactionDetails.Select(transaction => new SaleItem
             {
                 Plu = SearchValue,
@@ -72,11 +73,17 @@ public partial class SalesReportWindowViewModel : ViewModelBase
             })
         );
 
+        // foreach (var item in targetList)
+        // {
+        //     var newItemName = itemDetails.Description.Split(',')[0].Trim();
+        //     if (item.Name = newItemName)
+        // }
+
         targetList.Add(new GroupedSaleItem
         {
             Plu = SearchValue,
             Name = itemDetails.Description,
-            Items = itemList
+            Items = purchaseHistory
         });
 
         var settingsList = SelectedTabIndex switch
@@ -96,6 +103,8 @@ public partial class SalesReportWindowViewModel : ViewModelBase
 
     public async Task LoadAllItems()
     {
+        IsLoading = true;
+
         for (var i = 0; i < 3; i++)
         {
             SelectedTabIndex = i;
@@ -103,6 +112,7 @@ public partial class SalesReportWindowViewModel : ViewModelBase
         }
 
         SelectedTabIndex = 0;
+        IsLoading = false;
     }
 
     private async Task LoadItems()
@@ -149,7 +159,7 @@ public partial class SalesReportWindowViewModel : ViewModelBase
                 Plu = plu,
                 Name = itemDetails.Description,
                 Items = itemList,
-                ItemsTotalQty = itemList.Sum(i => i.Qty)
+                TotalQty = itemList.Sum(i => i.Qty)
             });
         }
     }

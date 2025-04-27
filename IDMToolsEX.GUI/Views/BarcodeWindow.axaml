@@ -12,7 +12,8 @@
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Barcodes"
         TransparencyLevelHint="AcrylicBlur"
-        Background="WhiteSmoke">
+        Background="WhiteSmoke"
+        IsEnabled="{Binding !IsLoading}">
 
     <Grid RowDefinitions="Auto,1*" Margin="10">
 
