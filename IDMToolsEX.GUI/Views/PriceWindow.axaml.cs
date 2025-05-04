@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.ViewModels;
@@ -34,5 +35,10 @@ public partial class PriceWindow : Window
     {
         if (e.Key == Key.Enter)
             ViewModel.GetItemPrice();
+    }
+
+    private void SearchBy_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
+    {
+        SearchTextBox.Focus();
     }
 }

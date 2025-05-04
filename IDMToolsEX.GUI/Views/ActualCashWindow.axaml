@@ -42,7 +42,7 @@
                 <NumericUpDown
                     ShowButtonSpinner="False"
                     Value="{Binding PhysicalMoney, Mode=TwoWay}"
-                    FormatString="C0" />
+                    FormatString="C0"  />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal">
@@ -51,22 +51,10 @@
                         FontWeight="Medium" />
             </StackPanel>
         </StackPanel>
-        <!-- </HeaderedContentControl> -->
-        <!-- <HeaderedContentControl Header="Kalkulasi"> -->
-        <!--     <StackPanel Spacing="8"> -->
-        <!-- <StackPanel Spacing="3"> -->
-        <!--     <TextBlock Text="Total Setoran Sales:" /> -->
-        <!--     <NumericUpDown -->
-        <!--         ShowButtonSpinner="False" -->
-        <!--         Value="{Binding SalesDeposit, Mode=TwoWay}" -->
-        <!--         FormatString="C0" /> -->
-        <!-- </StackPanel> -->
 
-        <!-- </StackPanel> -->
-        <!-- </HeaderedContentControl> -->
         <TextBlock
             Text="🧮 Aktual Kas = Total Uang Konsumen - (Total Kembalian + Total Cashout + Setoran Sales + BA Virtual (Struk) + Modal)"
-            TextWrapping="Wrap" HorizontalAlignment="Left" MaxWidth="480" Foreground="DarkGray" />
+            TextWrapping="Wrap" HorizontalAlignment="Left" MaxWidth="480" Foreground="Gray" />
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <DataGrid ItemsSource="{Binding CashSummary}" AutoGenerateColumns="False" GridLinesVisibility="All"

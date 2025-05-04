@@ -19,9 +19,9 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     private int _index;
     [ObservableProperty] private bool _isCommaDelimiter;
     [ObservableProperty] private bool _isNewlineDelimiter = true;
+    [ObservableProperty] private bool _isSpaceDelimiter;
 
     [ObservableProperty] private bool _isOneBarcode = true;
-    [ObservableProperty] private bool _isSpaceDelimiter;
     private string _lastPlu = string.Empty;
     [ObservableProperty] private int _lineCount;
     [ObservableProperty] private ObservableCollection<(string, string)> _modisOptions = [];
@@ -39,9 +39,11 @@ public partial class BarcodeWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoading;
     private CancellationTokenSource _cancellationTokenSource = new();
 
+    private MainWindowViewModel _mainWindowViewModel;
+
     public BarcodeWindowViewModel(MainWindowViewModel mainWindowViewModel, DatabaseService databaseService)
     {
-        // _mainWindowViewModel = mainWindowViewModel;
+        _mainWindowViewModel = mainWindowViewModel;
         _databaseService = databaseService;
     }
 
@@ -151,38 +153,30 @@ public partial class BarcodeWindowViewModel : ViewModelBase
             _lastPlu = plu;
         }
 
-        if (IsOneBarcode && barcodes.Length != 0)
+        if (barcodes.Length == 0)
         {
-            foreach (var barcode in barcodes)
+            BarcodeList.Add(new Barcode(_mainWindowViewModel)
             {
-                token.ThrowIfCancellationRequested();
-                if (string.IsNullOrEmpty(barcode)) continue;
-
-                var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode, token);
-                BarcodeList.Add(new Barcode
-                {
-                    Index = _index,
-                    Plu = plu,
-                    Abbreviation = details.Abbreviation ?? "TIDAK ADA SINGKATAN",
-                    Description = details.Description ?? "TIDAK ADA DESKRIPSI",
-                    BarcodeText = barcode,
-                    BarcodeImage = barcodeImage
-                });
-                break;
-            }
+                Index = _index,
+                Plu = plu,
+                Abbreviation = details.Abbreviation,
+                Description = details.Description,
+                BarcodeText = string.Empty,
+                BarcodeImage = null
+            });
         }
         else
         {
-            foreach (var barcode in barcodes)
+            foreach (var barcode in barcodes.Take(IsOneBarcode ? 1 : barcodes.Length))
             {
                 token.ThrowIfCancellationRequested();
                 var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode, token);
-                BarcodeList.Add(new Barcode
+                BarcodeList.Add(new Barcode(_mainWindowViewModel)
                 {
                     Index = _index,
                     Plu = plu,
-                    Abbreviation = details.Abbreviation ?? "TIDAK ADA SINGKATAN",
-                    Description = details.Description ?? "TIDAK ADA DESKRIPSI",
+                    Abbreviation = details.Abbreviation,
+                    Description = details.Description,
                     BarcodeText = barcode,
                     BarcodeImage = barcodeImage
                 });
@@ -213,4 +207,21 @@ public partial class Barcode : ObservableObject
     [ObservableProperty] private int _index;
     [ObservableProperty] private bool _isInvalid;
     [ObservableProperty] private string _plu = string.Empty;
+
+    private MainWindowViewModel _mainWindowViewModel;
+
+    public Barcode(MainWindowViewModel mainWindowViewModel)
+    {
+        _mainWindowViewModel = mainWindowViewModel;
+    }
+
+    partial void OnIsInvalidChanged(bool value)
+    {
+        if (value)
+            _mainWindowViewModel.Settings.BadBarcodeList.Add(Plu);
+        else
+            _mainWindowViewModel.Settings.BadBarcodeList.Remove(Plu);
+
+        _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
+    }
 }

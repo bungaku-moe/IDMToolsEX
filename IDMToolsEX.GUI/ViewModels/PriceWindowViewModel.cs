@@ -30,73 +30,79 @@ public partial class PriceWindowViewModel : ViewModelBase
     public async Task GetItemPrice()
     {
         if (string.IsNullOrWhiteSpace(SearchValue))
-        {
-            _mainWindowViewModel.AppendLog("Masukkan PLU/Barcode!");
             return;
-        }
 
         if (ByBarcode)
         {
             var itemDetails = await _databaseService.GetItemPriceByBarcodeAsync(SearchValue);
-            var promoPrice = await _databaseService.GetPromotionByBarcodeAsync(SearchValue);
+            if (itemDetails.Description == null)
+            {
+                _mainWindowViewModel.AppendLog($"Tidak dapat menemukan item {SearchValue}!");
+                SearchValue = string.Empty;
+                return;
+            }
 
-            if (ItemPricesList.All(item => item.Plu != SearchValue))
+            var promoPrice = await _databaseService.GetPromotionByBarcodeAsync(SearchValue);
+            var expired = await _databaseService.GetExpiredByPluAsync(itemDetails.Plu);
+
+            if (ItemPricesList.Any(item => item.Plu == SearchValue))
             {
-                _mainWindowViewModel.AppendLog($"Hasil pencarian: {itemDetails}");
-                if (promoPrice.HasValue)
-                    ItemPricesList.Add(new ItemPrice
-                    {
-                        Description = itemDetails.Description ?? "TIDAK ADA DESKRIPSI",
-                        Price = FormatCurrency(itemDetails.Price),
-                        PricePromo = FormatCurrency(promoPrice.Value.Price - promoPrice.Value.Promo),
-                        Start = promoPrice.Value.Start.HasValue
-                            ? DateOnly.FromDateTime(promoPrice.Value.Start.Value.DateTime)
-                            : null,
-                        End = promoPrice.Value.End.HasValue
-                            ? DateOnly.FromDateTime(promoPrice.Value.End.Value.DateTime)
-                            : null,
-                        Plu = itemDetails.Plu ?? "TIDAK ADA PLU",
-                        Barcode = SearchValue
-                    });
-                else
-                    _mainWindowViewModel.AppendLog("Promo price data is not available.");
+                var existingItem = ItemPricesList.First(item => item.Plu == SearchValue);
+                ItemPricesList.Remove(existingItem);
             }
-            else
+
+            _mainWindowViewModel.AppendLog($"[PRICE TAG] Hasil pencarian: {itemDetails}");
+            ItemPricesList.Add(new ItemPrice
             {
-                _mainWindowViewModel.AppendLog($"Item {SearchValue} sudah ada di daftar.");
-            }
+                Description = itemDetails.Description,
+                Price = FormatCurrency(itemDetails.Price),
+                PricePromo = FormatCurrency(promoPrice.Value.Price - promoPrice.Value.Promo),
+                Start = promoPrice.Value.Start.HasValue
+                    ? DateOnly.FromDateTime(promoPrice.Value.Start.Value.DateTime)
+                    : null,
+                End = promoPrice.Value.End.HasValue
+                    ? DateOnly.FromDateTime(promoPrice.Value.End.Value.DateTime)
+                    : null,
+                Plu = itemDetails.Plu,
+                Expired = expired,
+                Barcode = SearchValue
+            });
         }
         else if (ByPlu)
         {
             var itemDetails = await _databaseService.GetItemDetailsByPluAsync(SearchValue);
-            var promoPrice = await _databaseService.GetPromotionByPluAsync(SearchValue);
+            if (itemDetails.Description == null)
+            {
+                _mainWindowViewModel.AppendLog($"Tidak dapat menemukan item {SearchValue}!");
+                SearchValue = string.Empty;
+                return;
+            }
 
-            if (ItemPricesList.All(item => item.Plu != SearchValue))
+            var promoPrice = await _databaseService.GetPromotionByPluAsync(SearchValue);
+            var expired = await _databaseService.GetExpiredByPluAsync(SearchValue);
+
+            if (ItemPricesList.Any(item => item.Plu == SearchValue))
             {
-                _mainWindowViewModel.AppendLog($"Hasil pencarian harga: {itemDetails}");
-                ItemPricesList.Add(new ItemPrice
-                {
-                    Description = itemDetails.Description ?? "TIDAK ADA DESKRIPSI",
-                    Price = FormatCurrency(itemDetails.Price),
-                    PricePromo = FormatCurrency(promoPrice.Value.Price - promoPrice.Value.Promo),
-                    Start = promoPrice.Value.Start.HasValue
-                        ? DateOnly.FromDateTime(promoPrice.Value.Start.Value.DateTime)
-                        : null,
-                    End = promoPrice.Value.End.HasValue
-                        ? DateOnly.FromDateTime(promoPrice.Value.End.Value.DateTime)
-                        : null,
-                    Plu = SearchValue,
-                    Barcode = string.Join(", ", itemDetails.Barcodes)
-                });
+                var existingItem = ItemPricesList.First(item => item.Plu == SearchValue);
+                ItemPricesList.Remove(existingItem);
             }
-            else
+
+            _mainWindowViewModel.AppendLog($"[PRICE TAG] Hasil pencarian: {itemDetails}");
+            ItemPricesList.Add(new ItemPrice
             {
-                _mainWindowViewModel.AppendLog($"Item {SearchValue} sudah ada di daftar.");
-            }
-        }
-        else
-        {
-            _mainWindowViewModel.AppendLog("Tidak ada hasil ditemukan.");
+                Description = itemDetails.Description,
+                Price = FormatCurrency(itemDetails.Price),
+                PricePromo = FormatCurrency(promoPrice.Value.Price - promoPrice.Value.Promo),
+                Start = promoPrice.Value.Start.HasValue
+                    ? DateOnly.FromDateTime(promoPrice.Value.Start.Value.DateTime)
+                    : null,
+                End = promoPrice.Value.End.HasValue
+                    ? DateOnly.FromDateTime(promoPrice.Value.End.Value.DateTime)
+                    : null,
+                Plu = SearchValue,
+                Expired = expired,
+                Barcode = string.Join(", ", itemDetails.Barcodes)
+            });
         }
 
         SearchValue = string.Empty;
@@ -110,12 +116,13 @@ public partial class PriceWindowViewModel : ViewModelBase
 
 public partial class ItemPrice : ObservableObject
 {
-    [ObservableProperty] private string _barcode = "TIDAK ADA BARCODE";
-    [ObservableProperty] private string _description = "TIDAK ADA DESKRIPSI";
+    [ObservableProperty] private string _barcode = string.Empty;
+    [ObservableProperty] private string _description = string.Empty;
     [ObservableProperty] private DateOnly? _end;
-    [ObservableProperty] private string _plu = "TIDAK ADA PLU";
+    [ObservableProperty] private string _plu = string.Empty;
     [ObservableProperty] private string? _price = "0";
     [ObservableProperty] private string? _pricePromo = "0";
     [ObservableProperty] private DateOnly? _start;
+    [ObservableProperty] private string _expired = string.Empty;
     public string PromotionColor => Start != null ? "Yellow" : "Transparent";
 }

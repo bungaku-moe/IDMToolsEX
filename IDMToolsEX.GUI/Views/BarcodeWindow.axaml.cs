@@ -20,10 +20,7 @@ public partial class BarcodeWindow : Window
             await _barcodeViewModel.InitializeAsync();
             InitializeComponent();
         };
-        Closed += (sender, args) =>
-        {
-            _barcodeViewModel.Cleanup();
-        };
+        Closed += (sender, args) => { _barcodeViewModel.Cleanup(); };
     }
 
     private async void OnModisSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -35,7 +32,14 @@ public partial class BarcodeWindow : Window
 
     private void OnInvalidBarcodeChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        // _mainWindowViewModel.Settings.BadBarcodeList.Add(e.Sender.GetValue());
+        if (e.Property != CheckBox.IsCheckedProperty || e.NewValue is not bool isChecked) return;
+        if (sender is not CheckBox checkBox || checkBox.DataContext is not Barcode dataItem) return;
+        var plu = dataItem.Plu; // Assuming 'Plu' is a property in your data model
+        if (isChecked)
+        {
+
+            // _barcodeViewModel.AddPluToBadBarcodeList(plu);
+        }
     }
 
     private async void OnShelfSelectionChanged(object? sender, SelectionChangedEventArgs e)
