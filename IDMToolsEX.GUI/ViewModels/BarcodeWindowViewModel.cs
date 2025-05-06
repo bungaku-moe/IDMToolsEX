@@ -153,6 +153,7 @@ public partial class BarcodeWindowViewModel : ViewModelBase
             _lastPlu = plu;
         }
 
+        // If barcodes is empty, add a placeholder barcode
         if (barcodes.Length == 0)
         {
             BarcodeList.Add(new Barcode(_mainWindowViewModel)
@@ -167,9 +168,14 @@ public partial class BarcodeWindowViewModel : ViewModelBase
         }
         else
         {
-            foreach (var barcode in barcodes.Take(IsOneBarcode ? 1 : barcodes.Length))
+            foreach (var barcode in barcodes)
             {
                 token.ThrowIfCancellationRequested();
+                var isInvalid = _mainWindowViewModel.Settings.BadBarcodeList.Any(badBarcode => badBarcode == barcode);
+
+                if (IsOneBarcode && isInvalid)
+                    continue;
+
                 var barcodeImage = await BarcodeGenerator.GenerateBarcodeImageAsync(barcode, token);
                 BarcodeList.Add(new Barcode(_mainWindowViewModel)
                 {
@@ -178,8 +184,12 @@ public partial class BarcodeWindowViewModel : ViewModelBase
                     Abbreviation = details.Abbreviation,
                     Description = details.Description,
                     BarcodeText = barcode,
-                    BarcodeImage = barcodeImage
+                    BarcodeImage = barcodeImage,
+                    IsInvalid = isInvalid
                 });
+
+                if (IsOneBarcode)
+                    break; // Add only one good barcode
             }
         }
     }
@@ -207,6 +217,7 @@ public partial class Barcode : ObservableObject
     [ObservableProperty] private int _index;
     [ObservableProperty] private bool _isInvalid;
     [ObservableProperty] private string _plu = string.Empty;
+    [ObservableProperty] private string _rowColor = "Transparent";
 
     private MainWindowViewModel _mainWindowViewModel;
 
@@ -218,9 +229,15 @@ public partial class Barcode : ObservableObject
     partial void OnIsInvalidChanged(bool value)
     {
         if (value)
-            _mainWindowViewModel.Settings.BadBarcodeList.Add(Plu);
+        {
+            RowColor = "Red";
+            _mainWindowViewModel.Settings.BadBarcodeList.Add(BarcodeText);
+        }
         else
-            _mainWindowViewModel.Settings.BadBarcodeList.Remove(Plu);
+        {
+            RowColor = "Transparent";
+            _mainWindowViewModel.Settings.BadBarcodeList.Remove(BarcodeText);
+        }
 
         _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
     }

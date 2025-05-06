@@ -64,14 +64,14 @@
                 <DataGridTextColumn Header="EXP" Binding="{Binding Expired}" Width="90" />
                 <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="110" />
                 <!-- <DataGridTextColumn Header="BARCODE" Binding="{Binding Barcode}" Width="1.3*" /> -->
-                <DataGridTemplateColumn IsReadOnly="False" Width="60">
+                <DataGridTemplateColumn IsReadOnly="False" Width="100">
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
                             <Button
                                 Command="{Binding ClearAllItemsCommand, ElementName=PriceWindowName}"
                                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontWeight="Medium">
-                                <Image Source="/Assets/delete.png" Width="30" />
+                                 Hapus
                             </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>

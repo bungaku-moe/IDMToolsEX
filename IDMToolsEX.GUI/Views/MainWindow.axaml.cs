@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -29,6 +31,23 @@ public partial class MainWindow : Window
             UpdateSettings();
             desktop.MainWindow = null;
         };
+        Closing += MainWindow_Closing;
+    }
+
+    private void MainWindow_Closing(object? sender, WindowClosingEventArgs e)
+    {
+        UpdateSettings();
+        // Cancel the default close behavior
+        e.Cancel = true;
+        // Hide all open windows
+        foreach (var window in GetOpenWindows())
+            window.Hide();
+    }
+
+    // Get all open windows in the application
+    private IEnumerable<Window> GetOpenWindows()
+    {
+        return ((IClassicDesktopStyleApplicationLifetime)Application.Current.ApplicationLifetime).Windows;
     }
 
     private void Initialization()

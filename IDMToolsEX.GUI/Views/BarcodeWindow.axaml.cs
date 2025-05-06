@@ -30,18 +30,6 @@ public partial class BarcodeWindow : Window
         await _barcodeViewModel.GetModisShelfsAsync(selectedItem);
     }
 
-    private void OnInvalidBarcodeChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property != CheckBox.IsCheckedProperty || e.NewValue is not bool isChecked) return;
-        if (sender is not CheckBox checkBox || checkBox.DataContext is not Barcode dataItem) return;
-        var plu = dataItem.Plu; // Assuming 'Plu' is a property in your data model
-        if (isChecked)
-        {
-
-            // _barcodeViewModel.AddPluToBadBarcodeList(plu);
-        }
-    }
-
     private async void OnShelfSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         await _barcodeViewModel.GenerateBarcodeFromModis();

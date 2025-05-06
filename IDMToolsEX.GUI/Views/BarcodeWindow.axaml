@@ -124,20 +124,70 @@
                   CanUserSortColumns="True"
                   Margin="0,10,0,0">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="NO." Binding="{Binding Index}" Width="60" />
-                <DataGridTextColumn Header="PLU" Binding="{Binding Plu}" Width="100" />
-                <!-- <DataGridTextColumn Header="Singkatan" Binding="{Binding Abbreviation}" Width="1*" /> -->
-                <DataGridTextColumn Header="DESKRIPSI" Binding="{Binding Description}" Width="2*" />
-                <DataGridTextColumn Header="BARCODE" Binding="{Binding BarcodeText}" Width="2*" />
-                <DataGridTemplateColumn Header="BARCODE" Width="2.5*">
+                <DataGridTemplateColumn Header="NO." Width="65">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding BarcodeImage}" MinWidth="180" MinHeight="120" Margin="5" />
+                            <Border Background="{Binding RowColor}">
+                                <TextBlock Text="{Binding Index}" Padding="5" VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="INVALID?" Binding="{Binding IsInvalid}" Width="80"
-                                        PropertyChanged="OnInvalidBarcodeChanged" />
+
+                <DataGridTemplateColumn Header="PLU" Width="105">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowColor}">
+                                <TextBlock Text="{Binding Plu}" Padding="5" VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="DESKRIPSI" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowColor}">
+                                <TextBlock Text="{Binding Description}" Padding="5" VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="BARCODE" Width="1.5*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowColor}">
+                                <TextBlock Text="{Binding BarcodeText}" Padding="5" VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="BARCODE" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowColor}">
+                                <Image Source="{Binding BarcodeImage}" MinWidth="180" MinHeight="120" Margin="5" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="INVALID?" Width="90">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowColor}">
+                                <CheckBox IsChecked="{Binding IsInvalid}" HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
