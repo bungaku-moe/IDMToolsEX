@@ -28,7 +28,7 @@
             </StackPanel>
             <TextBox x:Name="SearchTextBox" Text="{Binding SearchValue}" MinWidth="350" VerticalAlignment="Center"
                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="10"
-                     Watermark="Masukkan Barcode atau PLU" KeyDown="SearchTextBox_OnKeyDown">
+                     Watermark="Ketikkan Barcode atau PLU" KeyDown="SearchTextBox_OnKeyDown">
                 <i:Interaction.Behaviors>
                     <EventTriggerBehavior EventName="Loaded">
                         <ia:FocusControlAction />
@@ -36,8 +36,7 @@
                 </i:Interaction.Behaviors>
             </TextBox>
             <Button Content="Cari" Command="{Binding GetItemPriceCommand}" Padding="10" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="100" FontWeight="Bold"
-                    Background="LightBlue" Foreground="White">
+                    VerticalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="100" FontWeight="Bold">
                 <i:Interaction.Behaviors>
                     <EventTriggerBehavior EventName="Click">
                         <ia:FocusControlAction TargetControl="{Binding ElementName=SearchTextBox}" />

@@ -90,7 +90,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
             await _databaseService.GetTotalSalesDepositAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
         var totalCancel =
             await _databaseService.GetTotalCancelAsync(Date ?? DateTimeOffset.Now, Shift ?? 1, Station ?? 1);
-        var actualCash = expectedActualCash.totalActualCash - (totalCashout + salesDeposit + beritaAcaraVirtual.Struk);
+        var actualCash = expectedActualCash.totalActualCash - (totalCashout.TotalCashout + salesDeposit + beritaAcaraVirtual.Struk);
         var physicalMoney = ParseDecimal(PhysicalMoney);
 
         CashSummary.Clear();
@@ -100,7 +100,7 @@ public partial class ActualCashWindowViewModel : ViewModelBase
                 { Name = "ℹ️ Total Uang Konsumen", Value = FormatCurrency(expectedActualCash.totalConsumentCash) },
             new CashSummaryRow
                 { Name = "ℹ️ Total Uang Kembalian", Value = FormatCurrency(expectedActualCash.totalChangeCash) },
-            new CashSummaryRow { Name = "ℹ️ Total Tarik Tunai", Value = FormatCurrency(totalCashout) },
+            new CashSummaryRow { Name = "ℹ️ Total Tarik Tunai, Qty", Value = $"{FormatCurrency(totalCashout.TotalCashout)}, {totalCashout.Count}" },
             new CashSummaryRow
             {
                 Name = "ℹ️ Total BA Virtual (Cashout, Struk)",

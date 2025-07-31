@@ -149,13 +149,15 @@ public class DatabaseService : IDisposable
         return result.Value;
     }
 
-    public async Task<decimal?> GetTotalCashoutAsync(DateTimeOffset date, int shift, int station)
+    public async Task<(decimal? TotalCashout, int Count)> GetTotalCashoutAsync(DateTimeOffset date, int shift,
+        int station)
     {
         await EnsureConnectedAsync();
 
         const string query = """
                              SELECT
-                                 IFNULL(SUM(TUNAI), 0) AS totalCashout
+                                 IFNULL(SUM(TUNAI), 0) AS totalCashout,
+                                 SUM(CASE WHEN TUNAI != 0 THEN 1 ELSE 0 END) AS countCashout
                              FROM bayar
                              WHERE
                                  TANGGAL = @Tanggal AND
@@ -163,15 +165,15 @@ public class DatabaseService : IDisposable
                                  STATION = @Station;
                              """;
 
-        var result = await _connection.QuerySingleOrDefaultAsync<decimal?>(query, new
+        var result = await _connection.QuerySingleOrDefaultAsync<(decimal? TotalCashout, int Count)>(query, new
         {
             Tanggal = date.ToString("yyyy-MM-dd"),
             Shift = shift,
             Station = station.ToString("D2")
         });
 
-        if (result is null)
-            return 0;
+        if (result.TotalCashout is null)
+            return (0, 0);
 
         return result;
     }
@@ -274,7 +276,7 @@ public class DatabaseService : IDisposable
     {
         await EnsureConnectedAsync();
 
-        const string query = "SELECT DISTINCT NAMA_RAK, KET_RAK FROM rak ORDER BY NAMA_RAK;";
+        const string query = "SELECT DISTINCT KODEMODIS, KET_RAK FROM rak ORDER BY KODEMODIS;";
         return await _connection.QueryAsync<(string, string)>(query);
     }
 
@@ -285,7 +287,7 @@ public class DatabaseService : IDisposable
         const string query = """
                              SELECT DISTINCT NOSHELF
                              FROM rak
-                             WHERE NAMA_RAK = @ShelfName
+                             WHERE KODEMODIS = @ShelfName
                              ORDER BY NOSHELF ASC;
                              """;
 
@@ -300,7 +302,7 @@ public class DatabaseService : IDisposable
         const string query = """
                              SELECT PLUMD
                              FROM rak
-                             WHERE NAMA_RAK = @ShelfName AND NOSHELF BETWEEN @ShelfNumberFrom AND @ShelfNumberTo;
+                             WHERE KODEMODIS = @ShelfName AND NOSHELF BETWEEN @ShelfNumberFrom AND @ShelfNumberTo;
                              """;
 
         return await _connection.QueryAsync<string>(query,

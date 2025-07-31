@@ -11,7 +11,7 @@
         x:DataType="vm:SalesReportWindowViewModel"
         Icon="/Assets/app-icon.ico"
         Title="IDMToolsEX - Laporan Sales"
-        MinWidth="900" MinHeight="300"
+        MinWidth="1000" MinHeight="300"
         TransparencyLevelHint="AcrylicBlur"
         Background="WhiteSmoke"
         IsEnabled="{Binding !IsLoading}">
@@ -50,17 +50,18 @@
             </StackPanel>
 
             <!-- Add Button -->
-            <Button Content="➕" Width="80" Height="35"
+            <Button Content="➕" Width="35" Height="35"
                     VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                     FontWeight="Black"
-                    Command="{Binding AddItemCommand}">
+                    Command="{Binding AddItemCommand}"
+                    CommandParameter="{Binding ElementName=SalesReportWindowName}">
                 <i:Interaction.Behaviors>
                     <EventTriggerBehavior EventName="Click">
                         <ia:FocusControlAction TargetControl="{Binding ElementName=NewPluTextBox}" />
                     </EventTriggerBehavior>
                 </i:Interaction.Behaviors>
             </Button>
-            <Button Content="Hapus Semua" Height="35"
+            <Button Content="🗑️" Height="35"
                     VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                     FontWeight="Black"
                     Command="{Binding ClearAllItemsCommand, ElementName=SalesReportWindowName}">
@@ -70,11 +71,21 @@
                     </EventTriggerBehavior>
                 </i:Interaction.Behaviors>
             </Button>
+            <!-- <Button Content="🔄️" Width="35" Height="35" -->
+            <!--         VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" -->
+            <!--         FontWeight="Black" -->
+            <!--         Command="{Binding SortItemsCommand}" -->
+            <!--         CommandParameter="{Binding ElementName=SalesReportWindowName}" /> -->
+            <!-- <Button Content="🔃" Width="35" Height="35" -->
+            <!--         VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" -->
+            <!--         FontWeight="Black" -->
+            <!--         Command="{Binding SortItemsCommand}" -->
+            <!--         CommandParameter="{Binding ElementName=SalesReportWindowName}" /> -->
         </StackPanel>
 
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4">
             <TabControl SelectedIndex="{Binding SelectedTabIndex}">
-                <TabItem Header="Hemat" FontSize="20">
+                <TabItem Header="Hemat Minggu Ini" FontSize="20">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding HematItems}">
                             <ItemsControl.ItemTemplate>
@@ -94,7 +105,7 @@
                                                         VerticalContentAlignment="Center" />
                                             </DockPanel>
                                         </Expander.Header>
-                
+
                                         <DataGrid ItemsSource="{Binding Items}"
                                                   AutoGenerateColumns="False"
                                                   CanUserResizeColumns="True"
@@ -151,8 +162,8 @@
                 <!--         </ItemsControl> -->
                 <!--     </ScrollViewer> -->
                 <!-- </TabItem> -->
-                
-                <TabItem Header="Murah" FontSize="20">
+
+                <TabItem Header="Paling Murah" FontSize="20">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding MurahItems}">
                             <ItemsControl.ItemTemplate>
@@ -191,8 +202,8 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </TabItem>
-                
-                <TabItem Header="Heboh" FontSize="20">
+
+                <TabItem Header="Tebus Heboh" FontSize="20">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding HebohItems}">
                             <ItemsControl.ItemTemplate>

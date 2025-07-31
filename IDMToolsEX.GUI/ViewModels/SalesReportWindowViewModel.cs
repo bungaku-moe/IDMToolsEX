@@ -2,10 +2,13 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IDMToolsEX.Lib;
 using IDMToolsEX.Models;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 
 namespace IDMToolsEX.ViewModels;
 
@@ -38,12 +41,14 @@ public partial class SalesReportWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task AddItem()
+    public async Task AddItem(Window window)
     {
-        if (string.IsNullOrWhiteSpace(SearchValue))
+        if (string.IsNullOrWhiteSpace(SearchValue) || string.IsNullOrEmpty(SearchValue))
         {
-            _mainWindowViewModel.AppendLog("Masukkan PLU!");
-            return;
+            var box = MessageBoxManager
+                .GetMessageBoxStandard("Tambah Item", "Masukkan nomor PLU!");
+            var result = await box.ShowWindowDialogAsync(window);
+            if (result is ButtonResult.Ok or ButtonResult.None) return;
         }
 
         var targetList = SelectedTabIndex switch
@@ -56,13 +61,23 @@ public partial class SalesReportWindowViewModel : ViewModelBase
 
         if (targetList == null || targetList.Any(item => item.Plu == SearchValue))
         {
-            _mainWindowViewModel.AppendLog("PLU sudah ada di daftar!");
-            return;
+            _mainWindowViewModel.AppendLog("[Laporan Sales] PLU sudah ada di daftar!");
+            var box = MessageBoxManager
+                .GetMessageBoxStandard("Tambah Item", $"PLU: {SearchValue} sudah ada di daftar!");
+            var result = await box.ShowWindowDialogAsync(window);
+            if (result is ButtonResult.Ok or ButtonResult.None) return;
         }
 
         var itemDetails = await _databaseService.GetItemDetailsByPluAsync(SearchValue);
-        var transactionDetails = await _databaseService.GetTransactionDetailsAsync(SearchValue, Date, Shift);
+        if (string.IsNullOrEmpty(itemDetails.Description))
+        {
+            var box = MessageBoxManager
+                .GetMessageBoxStandard($"Tambah Item", $"Tidak ada item dengan PLU: {SearchValue}! Tetap tambahkan?", ButtonEnum.YesNo);
+            var result = await box.ShowWindowDialogAsync(window);
+            if (result is ButtonResult.No or ButtonResult.None) return;
+        }
 
+        var transactionDetails = await _databaseService.GetTransactionDetailsAsync(SearchValue, Date, Shift);
         var purchaseHistory = new ObservableCollection<SaleItem>(
             transactionDetails.Select(transaction => new SaleItem
             {
@@ -86,6 +101,8 @@ public partial class SalesReportWindowViewModel : ViewModelBase
             Items = purchaseHistory
         });
 
+        SortItems();
+
         var settingsList = SelectedTabIndex switch
         {
             0 => _mainWindowViewModel.Settings.HematPluList,
@@ -97,7 +114,7 @@ public partial class SalesReportWindowViewModel : ViewModelBase
         settingsList?.Add(SearchValue);
 
         _mainWindowViewModel.SettingsLoader.SaveSettings(_mainWindowViewModel.Settings);
-        _mainWindowViewModel.AppendLog($"PLU {SearchValue} ditambahkan.");
+        _mainWindowViewModel.AppendLog($"[Laporan Sales] PLU {SearchValue} ditambahkan.");
         SearchValue = string.Empty;
     }
 
@@ -111,13 +128,14 @@ public partial class SalesReportWindowViewModel : ViewModelBase
             await LoadItems();
         }
 
+        SortItems();
         SelectedTabIndex = 0;
         IsLoading = false;
     }
 
     private async Task LoadItems()
     {
-        _mainWindowViewModel.AppendLog("Memuat PLU yang disimpan...!");
+        _mainWindowViewModel.AppendLog("[Laporan Sales] Memuat PLU yang disimpan...");
 
         var targetList = SelectedTabIndex switch
         {
@@ -162,6 +180,22 @@ public partial class SalesReportWindowViewModel : ViewModelBase
                 TotalQty = itemList.Sum(i => i.Qty)
             });
         }
+    }
+
+    [RelayCommand]
+    public void SortItems()
+    {
+        void SortList(ObservableCollection<GroupedSaleItem> list)
+        {
+            var sorted = list.OrderBy(x => x.Name).ToList();
+            list.Clear();
+            foreach (var item in sorted)
+                list.Add(item);
+        }
+
+        SortList(HematItems);
+        SortList(MurahItems);
+        SortList(HebohItems);
     }
 
     // private string FormatCurrency(decimal? value)
